@@ -20,40 +20,40 @@ public class IdentificationDto {
         private String customerId;
         private String identificationTypeId;
         private String identificationNumber;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate issuedDate;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate expiryDate;
-        
+
         private String issuingAuthority;
         private String issuingCountryId;
         private String issuingProvinceId;
         private Boolean isDefault;
         private Boolean isVerified;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime verificationDate;
-        
+
         private String verificationMethod;
         private String verificationReference;
         private Boolean isActive;
         private String documentImagePath;
         private Integer riskScore;
         private String blacklistCheckStatus;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime blacklistCheckDate;
-        
+
         private String notes;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime createdDate;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         private LocalDateTime lastModifiedDate;
-        
+
         private String createdBy;
         private String lastModifiedBy;
     }
@@ -65,13 +65,13 @@ public class IdentificationDto {
     public static class CreateRequest {
         private String identificationTypeId;
         private String identificationNumber;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate issuedDate;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate expiryDate;
-        
+
         private String issuingAuthority;
         private String issuingCountryId;
         private String issuingProvinceId;
@@ -86,13 +86,13 @@ public class IdentificationDto {
     @AllArgsConstructor
     public static class UpdateRequest {
         private String identificationNumber;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate issuedDate;
-        
+
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate expiryDate;
-        
+
         private String issuingAuthority;
         private String issuingCountryId;
         private String issuingProvinceId;
@@ -118,10 +118,15 @@ public class IdentificationDto {
         private String identificationId;
         private String identificationTypeId;
         private String identificationNumber;
+
+        @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate expiryDate;
+
         private Boolean isDefault;
         private Boolean isVerified;
         private Boolean isActive;
+
+        // Added fields for MapStruct mapping
         private Boolean isExpired;
         private Boolean isExpiringSoon;
     }

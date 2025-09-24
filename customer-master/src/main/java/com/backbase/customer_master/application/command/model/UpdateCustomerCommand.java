@@ -79,5 +79,5 @@ public class UpdateCustomerCommand {
     private String notes;
 
     @NotNull(message = "Version number is required for optimistic locking")
-    private Long versionNo;
+    private Integer versionNo;
 }

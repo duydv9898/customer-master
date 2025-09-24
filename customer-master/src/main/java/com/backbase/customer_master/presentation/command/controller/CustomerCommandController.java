@@ -1,6 +1,5 @@
 package com.backbase.customer_master.presentation.command.controller;
 
-import com.backbase.customer_master.presentation.dto.generated.api.CustomersApiDelegate;
 import com.backbase.customer_master.presentation.dto.generated.model.*;
 import com.backbase.customer_master.application.command.handler.CreateCustomerCommandHandler;
 import com.backbase.customer_master.application.command.handler.UpdateCustomerCommandHandler;

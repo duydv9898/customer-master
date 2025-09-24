@@ -1,6 +1,5 @@
 package com.backbase.customer_master.application.mapper;
 
-
 import com.backbase.customer_master.domain.model.Customer;
 import com.backbase.customer_master.domain.model.Identification;
 import com.backbase.customer_master.presentation.dto.IdentificationDto;
@@ -13,9 +12,9 @@ import java.util.List;
  * MapStruct mapper for Identification entity and DTOs
  */
 @Mapper(
-    componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-    nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
+        componentModel = "spring",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS
 )
 public interface IdentificationMapper {
 
@@ -23,8 +22,6 @@ public interface IdentificationMapper {
      * Entity to Response DTO
      */
     @Mapping(target = "customerId", source = "customer.customerId")
-    @Mapping(target = "identificationNumberHash", ignore = true) // Don't expose hash
-    @Mapping(target = "ocrExtractedData", ignore = true) // Don't expose OCR data in normal response
     IdentificationDto.Response toResponse(Identification identification);
 
     /**
@@ -35,8 +32,8 @@ public interface IdentificationMapper {
     /**
      * Entity to Summary DTO
      */
-    @Mapping(target = "isExpired", expression = "java(identification.isExpired())")
-    @Mapping(target = "isExpiringSoon", expression = "java(identification.isExpiringSoon(30))")
+    @Mapping(target = "isExpired", ignore = true) // Will be calculated in @AfterMapping
+    @Mapping(target = "isExpiringSoon", ignore = true) // Will be calculated in @AfterMapping
     IdentificationDto.Summary toSummary(Identification identification);
 
     /**
@@ -102,13 +99,10 @@ public interface IdentificationMapper {
      */
     @AfterMapping
     default void enrichIdentificationResponse(@MappingTarget IdentificationDto.Response response, Identification identification) {
-        // Add any business logic here if needed
-        // For example, mask sensitive data, calculate derived fields, etc.
-
         // Mask identification number for security (show only last 4 digits)
         if (response.getIdentificationNumber() != null && response.getIdentificationNumber().length() > 4) {
             String masked = "*".repeat(response.getIdentificationNumber().length() - 4) +
-                           response.getIdentificationNumber().substring(response.getIdentificationNumber().length() - 4);
+                    response.getIdentificationNumber().substring(response.getIdentificationNumber().length() - 4);
             response.setIdentificationNumber(masked);
         }
     }
@@ -131,7 +125,7 @@ public interface IdentificationMapper {
         // Mask identification number in summary
         if (summary.getIdentificationNumber() != null && summary.getIdentificationNumber().length() > 4) {
             String masked = "*".repeat(summary.getIdentificationNumber().length() - 4) +
-                           summary.getIdentificationNumber().substring(summary.getIdentificationNumber().length() - 4);
+                    summary.getIdentificationNumber().substring(summary.getIdentificationNumber().length() - 4);
             summary.setIdentificationNumber(masked);
         }
     }
@@ -141,8 +135,6 @@ public interface IdentificationMapper {
      */
     @BeforeMapping
     default void prepareIdentificationEntity(IdentificationDto.CreateRequest request, @MappingTarget Identification identification) {
-        // Add any business logic here if needed
-        // For example, validate data, set defaults, etc.
         if (request.getIsDefault() == null) {
             request.setIsDefault(false);
         }
