@@ -3,52 +3,35 @@ package com.backbase.customer_master.application.command.model;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 /**
- * Command model for creating a new customer
+ * Command model for updating a customer
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateCustomerCommand {
+public class UpdateCustomerCommand {
 
-    @NotBlank(message = "Customer type is required")
-    @Size(max = 50, message = "Customer type must not exceed 50 characters")
-    private String customerType;
+    @NotBlank(message = "Customer ID is required")
+    private String customerId;
 
-    @NotBlank(message = "Full name is required")
     @Size(max = 200, message = "Full name must not exceed 200 characters")
     private String fullName;
 
-    @NotBlank(message = "First name is required")
     @Size(max = 100, message = "First name must not exceed 100 characters")
     private String firstName;
 
     @Size(max = 100, message = "Middle name must not exceed 100 characters")
     private String middleName;
 
-    @NotBlank(message = "Last name is required")
     @Size(max = 100, message = "Last name must not exceed 100 characters")
     private String lastName;
-
-    @NotNull(message = "Date of birth is required")
-    @Past(message = "Date of birth must be in the past")
-    private LocalDate dateOfBirth;
 
     @Size(max = 200, message = "Place of birth must not exceed 200 characters")
     private String placeOfBirth;
 
-    @NotBlank(message = "Gender ID is required")
-    @Size(max = 36, message = "Gender ID must not exceed 36 characters")
-    private String genderId;
-
     @Size(max = 36, message = "Marital status ID must not exceed 36 characters")
     private String maritalStatusId;
-
-    @Size(max = 36, message = "Nationality ID must not exceed 36 characters")
-    private String nationalityId;
 
     @Email(message = "Email should be valid")
     @Size(max = 100, message = "Email must not exceed 100 characters")
@@ -70,10 +53,6 @@ public class CreateCustomerCommand {
     @Size(max = 50, message = "Income range must not exceed 50 characters")
     private String incomeRange;
 
-    @NotBlank(message = "Branch ID is required")
-    @Size(max = 36, message = "Branch ID must not exceed 36 characters")
-    private String branchId;
-
     @Size(max = 50, message = "Customer segment must not exceed 50 characters")
     private String customerSegment;
 
@@ -90,14 +69,15 @@ public class CreateCustomerCommand {
     private String referralSource;
 
     @Pattern(regexp = "^(vi|en)$", message = "Language preference must be 'vi' or 'en'")
-    @Builder.Default
-    private String languagePreference = "vi";
+    private String languagePreference;
 
     @Size(max = 50, message = "Communication preference must not exceed 50 characters")
     private String communicationPreference;
 
-    @Builder.Default
-    private Boolean isConsentMarketing = false;
+    private Boolean isConsentMarketing;
 
     private String notes;
+
+    @NotNull(message = "Version number is required for optimistic locking")
+    private Long versionNo;
 }

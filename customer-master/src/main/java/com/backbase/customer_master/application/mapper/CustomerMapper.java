@@ -110,7 +110,7 @@ public interface CustomerMapper {
         if (page == null) {
             return null;
         }
-        
+
         return CustomerDto.PageResponse.builder()
                 .content(toResponseList(page.getContent()))
                 .totalElements(page.getTotalElements())

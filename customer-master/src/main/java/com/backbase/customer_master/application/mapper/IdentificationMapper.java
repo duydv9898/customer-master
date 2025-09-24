@@ -104,10 +104,10 @@ public interface IdentificationMapper {
     default void enrichIdentificationResponse(@MappingTarget IdentificationDto.Response response, Identification identification) {
         // Add any business logic here if needed
         // For example, mask sensitive data, calculate derived fields, etc.
-        
+
         // Mask identification number for security (show only last 4 digits)
         if (response.getIdentificationNumber() != null && response.getIdentificationNumber().length() > 4) {
-            String masked = "*".repeat(response.getIdentificationNumber().length() - 4) + 
+            String masked = "*".repeat(response.getIdentificationNumber().length() - 4) +
                            response.getIdentificationNumber().substring(response.getIdentificationNumber().length() - 4);
             response.setIdentificationNumber(masked);
         }
@@ -127,10 +127,10 @@ public interface IdentificationMapper {
             summary.setIsExpired(false);
             summary.setIsExpiringSoon(false);
         }
-        
+
         // Mask identification number in summary
         if (summary.getIdentificationNumber() != null && summary.getIdentificationNumber().length() > 4) {
-            String masked = "*".repeat(summary.getIdentificationNumber().length() - 4) + 
+            String masked = "*".repeat(summary.getIdentificationNumber().length() - 4) +
                            summary.getIdentificationNumber().substring(summary.getIdentificationNumber().length() - 4);
             summary.setIdentificationNumber(masked);
         }
