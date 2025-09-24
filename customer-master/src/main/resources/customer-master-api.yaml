@@ -1,0 +1,887 @@
+openapi: 3.0.3
+info:
+  title: Customer Master API
+  description: API for Customer Master Database Management System
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+
+paths:
+  # Customer APIs
+  /customers:
+    get:
+      tags:
+        - Customer Query
+      summary: Get all customers
+      operationId: getAllCustomers
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: customerId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: fullName
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPageResponse'
+    post:
+      tags:
+        - Customer Command
+      summary: Create new customer
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '201':
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /customers/{customerId}:
+    get:
+      tags:
+        - Customer Query
+      summary: Get customer by ID
+      operationId: getCustomerById
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+        '404':
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - Customer Command
+      summary: Update customer
+      operationId: updateCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+      responses:
+        '200':
+          description: Customer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerResponse'
+    delete:
+      tags:
+        - Customer Command
+      summary: Delete customer
+      operationId: deleteCustomer
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Customer deleted successfully
+
+  # Address APIs
+  /customers/{customerId}/addresses:
+    get:
+      tags:
+        - Address Query
+      summary: Get customer addresses
+      operationId: getCustomerAddresses
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customer addresses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AddressResponse'
+    post:
+      tags:
+        - Address Command
+      summary: Add address to customer
+      operationId: addCustomerAddress
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAddressRequest'
+      responses:
+        '201':
+          description: Address created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+
+  /addresses/{addressId}:
+    put:
+      tags:
+        - Address Command
+      summary: Update address
+      operationId: updateAddress
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddressRequest'
+      responses:
+        '200':
+          description: Address updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+    delete:
+      tags:
+        - Address Command
+      summary: Delete address
+      operationId: deleteAddress
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Address deleted successfully
+
+  # Identification APIs
+  /customers/{customerId}/identifications:
+    get:
+      tags:
+        - Identification Query
+      summary: Get customer identifications
+      operationId: getCustomerIdentifications
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of customer identifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IdentificationResponse'
+    post:
+      tags:
+        - Identification Command
+      summary: Add identification to customer
+      operationId: addCustomerIdentification
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIdentificationRequest'
+      responses:
+        '201':
+          description: Identification created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdentificationResponse'
+
+  # Reference Data APIs
+  /reference/countries:
+    get:
+      tags:
+        - Reference Data
+      summary: Get all countries
+      operationId: getAllCountries
+      responses:
+        '200':
+          description: List of countries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CountryResponse'
+
+  /reference/provinces:
+    get:
+      tags:
+        - Reference Data
+      summary: Get provinces by country
+      operationId: getProvincesByCountry
+      parameters:
+        - name: countryId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of provinces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProvinceResponse'
+
+  /reference/districts:
+    get:
+      tags:
+        - Reference Data
+      summary: Get districts by province
+      operationId: getDistrictsByProvince
+      parameters:
+        - name: provinceId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of districts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DistrictResponse'
+
+  /reference/wards:
+    get:
+      tags:
+        - Reference Data
+      summary: Get wards by district
+      operationId: getWardsByDistrict
+      parameters:
+        - name: districtId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of wards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WardResponse'
+
+  /reference/genders:
+    get:
+      tags:
+        - Reference Data
+      summary: Get all genders
+      operationId: getAllGenders
+      responses:
+        '200':
+          description: List of genders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GenderResponse'
+
+  /reference/marital-statuses:
+    get:
+      tags:
+        - Reference Data
+      summary: Get all marital statuses
+      operationId: getAllMaritalStatuses
+      responses:
+        '200':
+          description: List of marital statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MaritalStatusResponse'
+
+components:
+  schemas:
+    # Customer Schemas
+    CustomerResponse:
+      type: object
+      properties:
+        customerId:
+          type: string
+          description: Customer ID (CIF)
+        customerType:
+          type: string
+          description: Customer type
+        fullName:
+          type: string
+          description: Full name
+        firstName:
+          type: string
+          description: First name
+        middleName:
+          type: string
+          description: Middle name
+        lastName:
+          type: string
+          description: Last name
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth
+        placeOfBirth:
+          type: string
+          description: Place of birth
+        genderId:
+          type: string
+          description: Gender ID
+        maritalStatusId:
+          type: string
+          description: Marital status ID
+        nationalityId:
+          type: string
+          description: Nationality ID
+        email:
+          type: string
+          format: email
+          description: Email address
+        phoneNumber:
+          type: string
+          description: Phone number
+        cifStatus:
+          type: string
+          description: CIF status
+        branchId:
+          type: string
+          description: Branch ID
+        createdDate:
+          type: string
+          format: date-time
+          description: Created date
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: Last modified date
+        versionNo:
+          type: integer
+          description: Version number
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/AddressResponse'
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationResponse'
+
+    CreateCustomerRequest:
+      type: object
+      required:
+        - customerType
+        - fullName
+        - firstName
+        - lastName
+        - dateOfBirth
+        - genderId
+        - branchId
+      properties:
+        customerType:
+          type: string
+          description: Customer type
+        fullName:
+          type: string
+          description: Full name
+        firstName:
+          type: string
+          description: First name
+        middleName:
+          type: string
+          description: Middle name
+        lastName:
+          type: string
+          description: Last name
+        dateOfBirth:
+          type: string
+          format: date
+          description: Date of birth
+        placeOfBirth:
+          type: string
+          description: Place of birth
+        genderId:
+          type: string
+          description: Gender ID
+        maritalStatusId:
+          type: string
+          description: Marital status ID
+        nationalityId:
+          type: string
+          description: Nationality ID
+        email:
+          type: string
+          format: email
+          description: Email address
+        phoneNumber:
+          type: string
+          description: Phone number
+        branchId:
+          type: string
+          description: Branch ID
+
+    UpdateCustomerRequest:
+      type: object
+      properties:
+        fullName:
+          type: string
+          description: Full name
+        firstName:
+          type: string
+          description: First name
+        middleName:
+          type: string
+          description: Middle name
+        lastName:
+          type: string
+          description: Last name
+        placeOfBirth:
+          type: string
+          description: Place of birth
+        maritalStatusId:
+          type: string
+          description: Marital status ID
+        email:
+          type: string
+          format: email
+          description: Email address
+        phoneNumber:
+          type: string
+          description: Phone number
+        versionNo:
+          type: integer
+          description: Version number for optimistic locking
+
+    CustomerPageResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+
+    # Address Schemas
+    AddressResponse:
+      type: object
+      properties:
+        addressId:
+          type: string
+          description: Address ID
+        customerId:
+          type: string
+          description: Customer ID
+        addressType:
+          type: string
+          description: Address type
+        addressLine1:
+          type: string
+          description: Address line 1
+        addressLine2:
+          type: string
+          description: Address line 2
+        wardId:
+          type: string
+          description: Ward ID
+        districtId:
+          type: string
+          description: District ID
+        provinceId:
+          type: string
+          description: Province ID
+        countryId:
+          type: string
+          description: Country ID
+        postalCodeId:
+          type: string
+          description: Postal code ID
+        isDefault:
+          type: boolean
+          description: Is default address
+        createdDate:
+          type: string
+          format: date-time
+        lastModifiedDate:
+          type: string
+          format: date-time
+
+    CreateAddressRequest:
+      type: object
+      required:
+        - addressType
+        - addressLine1
+        - wardId
+        - districtId
+        - provinceId
+        - countryId
+      properties:
+        addressType:
+          type: string
+          description: Address type
+        addressLine1:
+          type: string
+          description: Address line 1
+        addressLine2:
+          type: string
+          description: Address line 2
+        wardId:
+          type: string
+          description: Ward ID
+        districtId:
+          type: string
+          description: District ID
+        provinceId:
+          type: string
+          description: Province ID
+        countryId:
+          type: string
+          description: Country ID
+        postalCodeId:
+          type: string
+          description: Postal code ID
+        isDefault:
+          type: boolean
+          description: Is default address
+          default: false
+
+    UpdateAddressRequest:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+          description: Address line 1
+        addressLine2:
+          type: string
+          description: Address line 2
+        wardId:
+          type: string
+          description: Ward ID
+        districtId:
+          type: string
+          description: District ID
+        provinceId:
+          type: string
+          description: Province ID
+        countryId:
+          type: string
+          description: Country ID
+        postalCodeId:
+          type: string
+          description: Postal code ID
+        isDefault:
+          type: boolean
+          description: Is default address
+
+    # Identification Schemas
+    IdentificationResponse:
+      type: object
+      properties:
+        identificationId:
+          type: string
+          description: Identification ID
+        customerId:
+          type: string
+          description: Customer ID
+        identificationTypeId:
+          type: string
+          description: Identification type ID
+        identificationNumber:
+          type: string
+          description: Identification number
+        issuedDate:
+          type: string
+          format: date
+          description: Issued date
+        expiryDate:
+          type: string
+          format: date
+          description: Expiry date
+        issuingAuthority:
+          type: string
+          description: Issuing authority
+        issuingCountryId:
+          type: string
+          description: Issuing country ID
+        isDefault:
+          type: boolean
+          description: Is default identification
+        createdDate:
+          type: string
+          format: date-time
+        lastModifiedDate:
+          type: string
+          format: date-time
+
+    CreateIdentificationRequest:
+      type: object
+      required:
+        - identificationTypeId
+        - identificationNumber
+        - issuedDate
+        - issuingAuthority
+        - issuingCountryId
+      properties:
+        identificationTypeId:
+          type: string
+          description: Identification type ID
+        identificationNumber:
+          type: string
+          description: Identification number
+        issuedDate:
+          type: string
+          format: date
+          description: Issued date
+        expiryDate:
+          type: string
+          format: date
+          description: Expiry date
+        issuingAuthority:
+          type: string
+          description: Issuing authority
+        issuingCountryId:
+          type: string
+          description: Issuing country ID
+        isDefault:
+          type: boolean
+          description: Is default identification
+          default: false
+
+    # Reference Data Schemas
+    CountryResponse:
+      type: object
+      properties:
+        countryId:
+          type: string
+          description: Country ID
+        countryCode:
+          type: string
+          description: Country code
+        countryName:
+          type: string
+          description: Country name
+        countryNameEn:
+          type: string
+          description: Country name in English
+        isActive:
+          type: boolean
+          description: Is active
+
+    ProvinceResponse:
+      type: object
+      properties:
+        provinceId:
+          type: string
+          description: Province ID
+        provinceCode:
+          type: string
+          description: Province code
+        provinceName:
+          type: string
+          description: Province name
+        countryId:
+          type: string
+          description: Country ID
+        isActive:
+          type: boolean
+          description: Is active
+
+    DistrictResponse:
+      type: object
+      properties:
+        districtId:
+          type: string
+          description: District ID
+        districtCode:
+          type: string
+          description: District code
+        districtName:
+          type: string
+          description: District name
+        provinceId:
+          type: string
+          description: Province ID
+        isActive:
+          type: boolean
+          description: Is active
+
+    WardResponse:
+      type: object
+      properties:
+        wardId:
+          type: string
+          description: Ward ID
+        wardCode:
+          type: string
+          description: Ward code
+        wardName:
+          type: string
+          description: Ward name
+        districtId:
+          type: string
+          description: District ID
+        isActive:
+          type: boolean
+          description: Is active
+
+    GenderResponse:
+      type: object
+      properties:
+        genderId:
+          type: string
+          description: Gender ID
+        genderCode:
+          type: string
+          description: Gender code
+        genderName:
+          type: string
+          description: Gender name
+        isActive:
+          type: boolean
+          description: Is active
+
+    MaritalStatusResponse:
+      type: object
+      properties:
+        maritalStatusId:
+          type: string
+          description: Marital status ID
+        maritalStatusCode:
+          type: string
+          description: Marital status code
+        maritalStatusName:
+          type: string
+          description: Marital status name
+        isActive:
+          type: boolean
+          description: Is active
+
+    # Common Schemas
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: string
+          description: Error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []

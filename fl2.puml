@@ -1,0 +1,106 @@
+@startuml
+!theme plain
+title Activity Flow - Cập Nhật Hồ Sơ Khách Hàng (Settings → Profile)
+
+|#lightblue|Khách Hàng|
+start
+:Mở App & Vào Settings → Profile;
+:Chọn trường cần cập nhật
+(số điện thoại, email, địa chỉ,
+ngôn ngữ, nghề nghiệp...);
+:Nhập giá trị mới;
+
+if (Có yêu cầu xác minh?) then (Có)
+    :Xác thực bổ sung: OTP/biometric;
+else (Không)
+endif
+
+:Submit thay đổi;
+
+|#lightgreen|Mobile App|
+:Hiển thị form profile
+(prefill từ dữ liệu hiện tại);
+:Client-side validation
+(định dạng email/phone,
+độ dài, bắt buộc...);
+:Gửi request Update Profile
+→ Backbase Backend
+(payload: các trường thay đổi +
+metadata thiết bị/phiên);
+
+|#lightyellow|Backbase Backend|
+:Nhận request từ Mobile App;
+:Business validation
+(quy tắc nghiệp vụ: trường nào KH được
+tự sửa, cần OTP, cần RM duyệt...);
+:Chuẩn hóa & Map field
+theo contract tích hợp;
+:Gọi API Customer Master:
+UpdateCustomerProfile
+(chỉ các field thay đổi)
+kèm correlationId, sourceApp=MOBILE_APP;
+
+|#lightcoral|Customer Master (CM)|
+:Nhận yêu cầu cập nhật;
+:Server-side validation & quyền hạn
+(các trường cho phép self-service);
+:Kiểm tra tác động tuân thủ;
+
+if (Thay đổi ảnh hưởng KYC/AML?) then (Có)
+    :Đánh giá KYC/AML re-check (async);
+    note right: PII nhạy cảm / địa chỉ / định danh
+else (Không)
+endif
+
+if (Thay đổi liên hệ?) then (Có)
+    :Gửi OTP/verification
+    (qua Notification);
+    note right: email/phone
+else (Không)
+endif
+
+:Cập nhật bản ghi hiện tại
+(bảng customer/address/identification),
+tăng version_no;
+
+:Ghi audit/event vào event
+(entity, entity_id, version_no,
+changed_fields, event_time,
+event_by, correlation_id, source_app);
+
+if (Cần phát domain event?) then (Có)
+    :Phát domain event:
+    CustomerProfileUpdated
+    cho Data Lake/ESB/Notification;
+else (Không)
+endif
+
+:Trả kết quả về Backbase
+(OK + version_no mới / lỗi chi tiết);
+
+|#lightyellow|Backbase Backend|
+:Nhận kết quả từ CM;
+
+if (Update thành công?) then (Có)
+    :Trả response về Mobile App
+    (thành công + message code);
+else (Không)
+    :Trả response về Mobile App
+    (thất bại + message code);
+endif
+
+|#lightgreen|Mobile App|
+:Nhận response;
+
+if (Kết quả thành công?) then (Có)
+    |#lightblue|Khách Hàng|
+    :Hiển thị "Cập nhật thành công"
+    (+ badge "Đang xác minh" nếu có re-check);
+else (Không)
+    |#lightblue|Khách Hàng|
+    :Hiển thị lỗi + gợi ý chỉnh sửa;
+endif
+
+stop
+
+@enduml
