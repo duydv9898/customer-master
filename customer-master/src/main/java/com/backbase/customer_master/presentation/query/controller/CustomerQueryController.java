@@ -2,6 +2,7 @@ package com.backbase.customer_master.presentation.query.controller;
 
 import com.backbase.customer_master.application.query.handler.CustomerQueryHandler;
 import com.backbase.customer_master.application.query.model.*;
+import com.backbase.customer_master.application.query.service.CustomerQueryService;
 import com.backbase.customer_master.presentation.dto.CustomerDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,6 +32,7 @@ import java.util.Optional;
 public class CustomerQueryController {
 
     private final CustomerQueryHandler customerQueryHandler;
+    private final CustomerQueryService customerQueryService;
 
     @Operation(summary = "Get customer by ID", description = "Retrieves a customer by their ID")
     @ApiResponse(responseCode = "200", description = "Customer found")
@@ -39,13 +41,13 @@ public class CustomerQueryController {
     public ResponseEntity<CustomerDTO> getCustomerById(
             @Parameter(description = "Customer ID") @PathVariable String customerId) {
         log.info("Retrieving customer: {}", customerId);
-        
-        GetCustomerByIdQuery query = GetCustomerByIdQuery.builder()
-                .customerId(customerId)
-                .build();
-        
-        CustomerDTO customer = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customer);
+//
+//        GetCustomerByIdQuery query = GetCustomerByIdQuery.builder()
+//                .customerId(customerId)
+//                .build();
+//
+//        CustomerDTO customer = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getCustomerById(customerId));
     }
 
     @Operation(summary = "Get customer basic info", description = "Retrieves basic customer information without related entities")
@@ -56,12 +58,12 @@ public class CustomerQueryController {
             @Parameter(description = "Customer ID") @PathVariable String customerId) {
         log.info("Retrieving customer basic info: {}", customerId);
         
-        GetCustomerBasicByIdQuery query = GetCustomerBasicByIdQuery.builder()
-                .customerId(customerId)
-                .build();
-        
-        CustomerDTO customer = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customer);
+//        GetCustomerBasicByIdQuery query = GetCustomerBasicByIdQuery.builder()
+//                .customerId(customerId)
+//                .build();
+//
+//        CustomerDTO customer = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getCustomerBasicById(customerId));
     }
 
     @Operation(summary = "Get all customers", description = "Retrieves all customers with pagination")
@@ -70,13 +72,13 @@ public class CustomerQueryController {
     public ResponseEntity<Page<CustomerDTO>> getAllCustomers(
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Retrieving all customers with pagination");
+//
+//        GetAllCustomersQuery query = GetAllCustomersQuery.builder()
+//                .pageable(pageable)
+//                .build();
         
-        GetAllCustomersQuery query = GetAllCustomersQuery.builder()
-                .pageable(pageable)
-                .build();
-        
-        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
+//        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getAllCustomers(pageable));
     }
 
     @Operation(summary = "Search customers by name", description = "Searches customers by full name")
@@ -86,14 +88,14 @@ public class CustomerQueryController {
             @Parameter(description = "Name to search for") @RequestParam String name,
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Searching customers by name: {}", name);
-        
-        SearchCustomersByNameQuery query = SearchCustomersByNameQuery.builder()
-                .name(name)
-                .pageable(pageable)
-                .build();
-        
-        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
+//
+//        SearchCustomersByNameQuery query = SearchCustomersByNameQuery.builder()
+//                .name(name)
+//                .pageable(pageable)
+//                .build();
+//
+//        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.searchCustomersByName(name, pageable));
     }
 
     @Operation(summary = "Get customers by branch", description = "Retrieves customers belonging to a specific branch")
@@ -104,13 +106,13 @@ public class CustomerQueryController {
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Retrieving customers by branch: {}", branchId);
         
-        GetCustomersByBranchQuery query = GetCustomersByBranchQuery.builder()
-                .branchId(branchId)
-                .pageable(pageable)
-                .build();
-        
-        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
+//        GetCustomersByBranchQuery query = GetCustomersByBranchQuery.builder()
+//                .branchId(branchId)
+//                .pageable(pageable)
+//                .build();
+//
+//        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getCustomersByBranch(branchId, pageable));
     }
 
     @Operation(summary = "Get customers by type", description = "Retrieves customers of a specific type")
@@ -121,13 +123,13 @@ public class CustomerQueryController {
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Retrieving customers by type: {}", customerType);
         
-        GetCustomersByTypeQuery query = GetCustomersByTypeQuery.builder()
-                .customerType(customerType)
-                .pageable(pageable)
-                .build();
-        
-        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
+//        GetCustomersByTypeQuery query = GetCustomersByTypeQuery.builder()
+//                .customerType(customerType)
+//                .pageable(pageable)
+//                .build();
+//
+//        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getCustomersByType(customerType, pageable));
     }
 
     @Operation(summary = "Get customers by status", description = "Retrieves customers with a specific status")
@@ -137,12 +139,12 @@ public class CustomerQueryController {
             @Parameter(description = "CIF status") @PathVariable String status) {
         log.info("Retrieving customers by status: {}", status);
         
-        GetCustomersByStatusQuery query = GetCustomersByStatusQuery.builder()
-                .status(status)
-                .build();
-        
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
+//        GetCustomersByStatusQuery query = GetCustomersByStatusQuery.builder()
+//                .status(status)
+//                .build();
+//
+//        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        return ResponseEntity.ok(customerQueryService.getCustomersByStatus(status));
     }
 
     @Operation(summary = "Find customer by email", description = "Finds a customer by their email address")
@@ -152,12 +154,12 @@ public class CustomerQueryController {
     public ResponseEntity<CustomerDTO> findCustomerByEmail(
             @Parameter(description = "Email address") @PathVariable String email) {
         log.info("Finding customer by email: {}", email);
-        
-        FindCustomerByEmailQuery query = FindCustomerByEmailQuery.builder()
-                .email(email)
-                .build();
-        
-        Optional<CustomerDTO> customer = customerQueryHandler.handle(query);
+
+//        FindCustomerByEmailQuery query = FindCustomerByEmailQuery.builder()
+//                .email(email)
+//                .build();
+//
+        Optional<CustomerDTO> customer = customerQueryService.findCustomerByEmail(email);
         return customer.map(ResponseEntity::ok)
                       .orElse(ResponseEntity.notFound().build());
     }
@@ -170,11 +172,11 @@ public class CustomerQueryController {
             @Parameter(description = "Phone number") @PathVariable String phoneNumber) {
         log.info("Finding customer by phone: {}", phoneNumber);
         
-        FindCustomerByPhoneNumberQuery query = FindCustomerByPhoneNumberQuery.builder()
-                .phoneNumber(phoneNumber)
-                .build();
+//        FindCustomerByPhoneNumberQuery query = FindCustomerByPhoneNumberQuery.builder()
+//                .phoneNumber(phoneNumber)
+//                .build();
         
-        Optional<CustomerDTO> customer = customerQueryHandler.handle(query);
+        Optional<CustomerDTO> customer = customerQueryService.findCustomerByPhoneNumber(phoneNumber);
         return customer.map(ResponseEntity::ok)
                       .orElse(ResponseEntity.notFound().build());
     }
@@ -206,12 +208,12 @@ public class CustomerQueryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         log.info("Retrieving customers by date of birth range: {} to {}", startDate, endDate);
         
-        GetCustomersByDateOfBirthRangeQuery query = GetCustomersByDateOfBirthRangeQuery.builder()
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
+//        GetCustomersByDateOfBirthRangeQuery query = GetCustomersByDateOfBirthRangeQuery.builder()
+//                .startDate(startDate)
+//                .endDate(endDate)
+//                .build();
         
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        List<CustomerDTO> customers = customerQueryService.getCustomersByDateOfBirthRange(startDate, endDate);
         return ResponseEntity.ok(customers);
     }
 
@@ -249,12 +251,12 @@ public class CustomerQueryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         log.info("Retrieving customers created between: {} and {}", startDate, endDate);
         
-        GetCustomersCreatedInRangeQuery query = GetCustomersCreatedInRangeQuery.builder()
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
+//        GetCustomersCreatedInRangeQuery query = GetCustomersCreatedInRangeQuery.builder()
+//                .startDate(startDate)
+//                .endDate(endDate)
+//                .build();
         
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        List<CustomerDTO> customers = customerQueryService.getCustomersCreatedInRange(startDate, endDate);
         return ResponseEntity.ok(customers);
     }
 
@@ -264,12 +266,12 @@ public class CustomerQueryController {
     public ResponseEntity<List<CustomerDTO>> getCustomersByRelationshipManager(
             @Parameter(description = "Relationship manager ID") @PathVariable String relationshipManagerId) {
         log.info("Retrieving customers by relationship manager: {}", relationshipManagerId);
+//
+//        GetCustomersByRelationshipManagerQuery query = GetCustomersByRelationshipManagerQuery.builder()
+//                .relationshipManagerId(relationshipManagerId)
+//                .build();
         
-        GetCustomersByRelationshipManagerQuery query = GetCustomersByRelationshipManagerQuery.builder()
-                .relationshipManagerId(relationshipManagerId)
-                .build();
-        
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        List<CustomerDTO> customers = customerQueryService.getCustomersByRelationshipManager(relationshipManagerId);
         return ResponseEntity.ok(customers);
     }
 
@@ -279,12 +281,12 @@ public class CustomerQueryController {
     public ResponseEntity<List<CustomerDTO>> getCustomersByKycStatus(
             @Parameter(description = "KYC status") @PathVariable String kycStatus) {
         log.info("Retrieving customers by KYC status: {}", kycStatus);
+//
+//        GetCustomersByKycStatusQuery query = GetCustomersByKycStatusQuery.builder()
+//                .kycStatus(kycStatus)
+//                .build();
         
-        GetCustomersByKycStatusQuery query = GetCustomersByKycStatusQuery.builder()
-                .kycStatus(kycStatus)
-                .build();
-        
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        List<CustomerDTO> customers = customerQueryService.getCustomersByKycStatus(kycStatus);
         return ResponseEntity.ok(customers);
     }
 
@@ -299,7 +301,7 @@ public class CustomerQueryController {
                 .riskLevel(riskLevel)
                 .build();
         
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+        List<CustomerDTO> customers = customerQueryService.getCustomersByRiskLevel(riskLevel);
         return ResponseEntity.ok(customers);
     }
 
@@ -311,12 +313,12 @@ public class CustomerQueryController {
             @PageableDefault(size = 20) Pageable pageable) {
         log.info("Retrieving customers by segment: {}", customerSegment);
         
-        GetCustomersBySegmentQuery query = GetCustomersBySegmentQuery.builder()
-                .customerSegment(customerSegment)
-                .pageable(pageable)
-                .build();
-        
-        Page<CustomerDTO> customers = customerQueryHandler.handle(query);
+//        GetCustomersBySegmentQuery query = GetCustomersBySegmentQuery.builder()
+//                .customerSegment(customerSegment)
+//                .pageable(pageable)
+//                .build();
+//
+        Page<CustomerDTO> customers = customerQueryService.getCustomersBySegment(customerSegment, pageable);
         return ResponseEntity.ok(customers);
     }
 
@@ -327,11 +329,11 @@ public class CustomerQueryController {
             @Parameter(description = "Customer ID") @PathVariable String customerId) {
         log.debug("Checking if customer exists: {}", customerId);
         
-        CustomerExistsQuery query = CustomerExistsQuery.builder()
-                .customerId(customerId)
-                .build();
+//        CustomerExistsQuery query = CustomerExistsQuery.builder()
+//                .customerId(customerId)
+//                .build();
         
-        Boolean exists = customerQueryHandler.handle(query);
+        Boolean exists = customerQueryService.customerExists(customerId);
         return ResponseEntity.ok(exists);
     }
 
@@ -342,11 +344,11 @@ public class CustomerQueryController {
             @Parameter(description = "CIF status") @PathVariable String status) {
         log.debug("Counting customers by status: {}", status);
         
-        CountCustomersByStatusQuery query = CountCustomersByStatusQuery.builder()
-                .status(status)
-                .build();
-        
-        Long count = customerQueryHandler.handle(query);
+//        CountCustomersByStatusQuery query = CountCustomersByStatusQuery.builder()
+//                .status(status)
+//                .build();
+//
+        Long count = customerQueryService.countCustomersByStatus(status);
         return ResponseEntity.ok(count);
     }
 }

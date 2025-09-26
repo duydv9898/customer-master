@@ -2,6 +2,7 @@ package com.backbase.customer_master.presentation.command.controller;
 
 import com.backbase.customer_master.application.command.handler.CustomerCommandHandler;
 import com.backbase.customer_master.application.command.model.*;
+import com.backbase.customer_master.application.command.service.CustomerCommandService;
 import com.backbase.customer_master.presentation.dto.CustomerDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerCommandController {
 
     private final CustomerCommandHandler customerCommandHandler;
+    private final CustomerCommandService customerCommandService;
 
     @Operation(summary = "Create a new customer", description = "Creates a new customer record")
     @ApiResponse(responseCode = "201", description = "Customer created successfully")
@@ -33,8 +35,8 @@ public class CustomerCommandController {
     @PostMapping
     public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CreateCustomerCommand command) {
         log.info("Creating new customer");
-        CustomerDTO createdCustomer = customerCommandHandler.handle(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCustomer);
+//        CustomerDTO createdCustomer = customerCommandHandler.handle(command);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerCommandService.createCustomer(command));
     }
 
     @Operation(summary = "Update customer", description = "Updates an existing customer record")
@@ -49,8 +51,8 @@ public class CustomerCommandController {
         log.info("Updating customer: {}", customerId);
         // Ensure command has the correct customer ID
         command.setCustomerId(customerId);
-        CustomerDTO updatedCustomer = customerCommandHandler.handle(command);
-        return ResponseEntity.ok(updatedCustomer);
+//        CustomerDTO updatedCustomer = customerCommandHandler.handle(command);
+        return ResponseEntity.ok(customerCommandService.updateCustomer(command));
     }
 
     @Operation(summary = "Update customer status", description = "Updates the CIF status of a customer")
@@ -67,8 +69,8 @@ public class CustomerCommandController {
                 .status(status)
                 .build();
         
-        CustomerDTO updatedCustomer = customerCommandHandler.handle(command);
-        return ResponseEntity.ok(updatedCustomer);
+//        CustomerDTO updatedCustomer = customerCommandHandler.handle(command);
+        return ResponseEntity.ok(customerCommandService.updateCustomerStatus(command));
     }
 
     @Operation(summary = "Deactivate customer", description = "Deactivates a customer (soft delete)")
@@ -83,7 +85,8 @@ public class CustomerCommandController {
                 .customerId(customerId)
                 .build();
         
-        customerCommandHandler.handle(command);
+//        customerCommandHandler.handle(command);
+        customerCommandService.deactivateCustomer(command);
         return ResponseEntity.noContent().build();
     }
 
@@ -99,7 +102,8 @@ public class CustomerCommandController {
                 .customerId(customerId)
                 .build();
         
-        customerCommandHandler.handle(command);
+//        customerCommandHandler.handle(command);
+        customerCommandService.deleteCustomer(command);
         return ResponseEntity.noContent().build();
     }
 }
