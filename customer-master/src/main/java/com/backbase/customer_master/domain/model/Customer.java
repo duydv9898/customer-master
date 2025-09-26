@@ -1,256 +1,152 @@
-package com.backbase.customer_master.domain.model;
 
+package com.backbase.customer_master.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Customer entity representing CIF (Customer Information File)
- */
 @Entity
 @Table(name = "customer")
-@EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = {"addresses", "identifications", "relationships", "products"})
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Customer {
-
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "customer_id", length = 36)
-    @EqualsAndHashCode.Include
-    private String customerId;
+    @Column(name = "customer_id", length = 20)
+    private UUID customerId;
 
-    @Column(name = "customer_type", length = 50, nullable = false)
-    private String customerType;
+    @Column(name = "cif_status", length = 20, nullable = false)
+    private String cifStatus;
 
-    @Column(name = "full_name", length = 200, nullable = false)
+    @Column(name = "full_name", length = 120, nullable = false)
     private String fullName;
 
-    @Column(name = "first_name", length = 100, nullable = false)
-    private String firstName;
-
-    @Column(name = "middle_name", length = 100)
-    private String middleName;
-
-    @Column(name = "last_name", length = 100, nullable = false)
-    private String lastName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "gender", referencedColumnName = "gender_code", nullable = false)
+    private Gender gender;
 
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
-    @Column(name = "place_of_birth", length = 200)
-    private String placeOfBirth;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nationality", referencedColumnName = "country_code", nullable = false)
+    private Country nationality;
 
-    @Column(name = "gender_id", length = 36)
-    private String genderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "marital_status", referencedColumnName = "marital_status_code")
+    private MaritalStatus maritalStatus;
 
-    @Column(name = "marital_status_id", length = 36)
-    private String maritalStatusId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_type", referencedColumnName = "client_type_code", nullable = false)
+    private ClientType clientType;
 
-    @Column(name = "nationality_id", length = 36)
-    private String nationalityId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category", referencedColumnName = "category_code")
+    private Category category;
 
-    @Column(name = "email", length = 100)
-    private String email;
-
-    @Column(name = "phone_number", length = 20)
-    private String phoneNumber;
+    @Column(name = "primary_phone", length = 20, nullable = false)
+    private String primaryPhone;
 
     @Column(name = "secondary_phone", length = 20)
     private String secondaryPhone;
 
-    @Column(name = "occupation", length = 100)
-    private String occupation;
+    @Column(name = "email", length = 254)
+    private String email;
 
-    @Column(name = "education_level", length = 50)
-    private String educationLevel;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "preferred_contact_channel", referencedColumnName = "contact_channel_code")
+    private ContactChannel preferredContactChannel;
 
-    @Column(name = "income_range", length = 50)
-    private String incomeRange;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "occupation", referencedColumnName = "occupation_code")
+    private Occupation occupation;
 
-    @Column(name = "cif_status", length = 20, nullable = false)
-    @Builder.Default
-    private String cifStatus = "ACTIVE";
+    @Column(name = "job_title", length = 100)
+    private String jobTitle;
 
-    @Column(name = "risk_level", length = 20)
-    private String riskLevel;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classification_industry", referencedColumnName = "industry_code")
+    private Industry classificationIndustry;
 
-    @Column(name = "is_pep")
-    @Builder.Default
-    private Boolean isPep = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classification_business", referencedColumnName = "business_class_code")
+    private BusinessClassification classificationBusiness;
 
-    @Column(name = "is_sanctions_list")
-    @Builder.Default
-    private Boolean isSanctionsList = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classification_sector", referencedColumnName = "sector_code")
+    private EconomicSector classificationSector;
 
-    @Column(name = "kyc_status", length = 20)
-    private String kycStatus;
+    @Column(name = "monthly_income", length = 20)
+    private String monthlyIncome;
 
-    @Column(name = "branch_id", length = 36, nullable = false)
-    private String branchId;
+    @Column(name = "main_income_source", length = 30)
+    private String mainIncomeSource;
 
-    @Column(name = "customer_segment", length = 50)
-    private String customerSegment;
+    @Column(name = "account_usage_purpose", length = 50, nullable = false)
+    private String accountUsagePurpose;
 
-    @Column(name = "relationship_manager_id", length = 36)
-    private String relationshipManagerId;
+    @Column(name = "internal_client", length = 1)
+    private String internalClient;
 
-    @Column(name = "tax_id", length = 50)
-    private String taxId;
+    @Column(name = "tax_file_no", length = 20)
+    private String taxFileNo;
 
-    @Column(name = "source_of_fund", length = 100)
-    private String sourceOfFund;
+    @Column(name = "taxable", length = 1)
+    private String taxable;
 
-    @Column(name = "referral_source", length = 100)
-    private String referralSource;
+    @Column(name = "registration_channel", length = 20, nullable = false)
+    private String registrationChannel;
 
-    @Column(name = "language_preference", length = 10)
-    @Builder.Default
-    private String languagePreference = "vi";
+    @Column(name = "cif_created_date", nullable = false)
+    private LocalDate cifCreatedDate;
 
-    @Column(name = "communication_preference", length = 50)
-    private String communicationPreference;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "preferred_language", referencedColumnName = "language_code")
+    private Language preferredLanguage;
 
-    @Column(name = "is_consent_marketing")
-    @Builder.Default
-    private Boolean isConsentMarketing = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_segment_code", referencedColumnName = "segment_code")
+    private CustomerSegment customerSegment;
 
-    @Column(name = "consent_date")
-    private LocalDateTime consentDate;
-
-    @Column(name = "last_contact_date")
-    private LocalDateTime lastContactDate;
-
-    @Column(name = "notes", columnDefinition = "TEXT")
+    @Column(name = "notes", length = 500)
     private String notes;
 
-    @Version
-    @Column(name = "version_no")
-    private Long versionNo;
+    @Column(name = "customer_classification", length = 30)
+    private String customerClassification;
 
-    @CreatedDate
-    @Column(name = "created_date", updatable = false)
-    private LocalDateTime createdDate;
+    @Column(name = "version_no", nullable = false)
+    private Integer versionNo;
 
-    @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "created_by", length = 100, updatable = false)
+    @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    @Column(name = "last_modified_by", length = 100)
-    private String lastModifiedBy;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    // Relationships
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Address> addresses = new ArrayList<>();
+    @Column(name = "updated_by", length = 50, nullable = false)
+    private String updatedBy;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Identification> identifications = new ArrayList<>();
+    @Column(name = "source_app", length = 50)
+    private String sourceApp;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<CustomerRelationship> relationships = new ArrayList<>();
+    @Column(name = "correlation_id", length = 50)
+    private String correlationId;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<CustomerProduct> products = new ArrayList<>();
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Address> addresses;
 
-    // Constructor with required fields
-    public Customer(String customerType, String fullName, String firstName, 
-                   String lastName, LocalDate dateOfBirth, String genderId, 
-                   String branchId) {
-        this.customerId = generateCustomerId();
-        this.customerType = customerType;
-        this.fullName = fullName;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dateOfBirth = dateOfBirth;
-        this.genderId = genderId;
-        this.branchId = branchId;
-        this.cifStatus = "ACTIVE";
-        this.isPep = false;
-        this.isSanctionsList = false;
-        this.languagePreference = "vi";
-        this.isConsentMarketing = false;
-        this.addresses = new ArrayList<>();
-        this.identifications = new ArrayList<>();
-        this.relationships = new ArrayList<>();
-        this.products = new ArrayList<>();
-    }
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Identification> identifications;
 
-    // Business methods
-    public void addAddress(Address address) {
-        addresses.add(address);
-        address.setCustomer(this);
-    }
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CustomerRelationship> relationships;
 
-    public void removeAddress(Address address) {
-        addresses.remove(address);
-        address.setCustomer(null);
-    }
-
-    public void addIdentification(Identification identification) {
-        identifications.add(identification);
-        identification.setCustomer(this);
-    }
-
-    public void removeIdentification(Identification identification) {
-        identifications.remove(identification);
-        identification.setCustomer(null);
-    }
-
-    public void updateProfile(String fullName, String firstName, String middleName, 
-                            String lastName, String placeOfBirth, String maritalStatusId,
-                            String email, String phoneNumber) {
-        this.fullName = fullName;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.placeOfBirth = placeOfBirth;
-        this.maritalStatusId = maritalStatusId;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-    }
-
-    public void updateStatus(String cifStatus) {
-        this.cifStatus = cifStatus;
-    }
-
-    public boolean isActive() {
-        return "ACTIVE".equals(cifStatus);
-    }
-
-    /**
-     * Generate customer ID (CIF) in format: CIF + timestamp + random
-     */
-    private String generateCustomerId() {
-        return "CIF" + System.currentTimeMillis() + String.format("%04d", 
-               (int)(Math.random() * 10000));
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (customerId == null) {
-            customerId = generateCustomerId();
-        }
-    }
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CustomerProduct> products;
 }

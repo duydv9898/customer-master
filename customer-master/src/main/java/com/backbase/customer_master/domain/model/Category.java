@@ -7,24 +7,24 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "client_type")
+@Table(name = "category")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClientType {
+public class Category {
     @Id
-    @Column(name = "client_type_id", nullable = false)
-    private UUID clientTypeId;
+    @Column(name = "category_id", nullable = false)
+    private UUID categoryId;
 
-    @Column(name = "client_type_code", length = 20, nullable = false, unique = true)
-    private String clientTypeCode;
+    @Column(name = "category_code", length = 20, nullable = false, unique = true)
+    private String categoryCode;
 
-    @Column(name = "client_type_name", length = 100, nullable = false)
-    private String clientTypeName;
+    @Column(name = "category_name", length = 100, nullable = false)
+    private String categoryName;
 
-    @Column(name = "client_type_local", length = 100)
-    private String clientTypeLocal;
+    @Column(name = "category_local", length = 100)
+    private String categoryLocal;
 
     @Column(name = "description", length = 255)
     private String description;
@@ -50,6 +50,6 @@ public class ClientType {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "clientType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Customer> customers;
 }

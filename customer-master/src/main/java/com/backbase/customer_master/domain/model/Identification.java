@@ -2,183 +2,87 @@ package com.backbase.customer_master.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * Identification entity for customer identification documents
- */
 @Entity
 @Table(name = "identification")
-@EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "customer")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Identification {
-
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "identification_id", length = 36)
-    @EqualsAndHashCode.Include
-    private String identificationId;
+    @Column(name = "identification_id", nullable = false)
+    private UUID identificationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "identification_type_id", length = 36, nullable = false)
-    private String identificationTypeId;
+    @Column(name = "kyc_status", length = 20, nullable = false)
+    private String kycStatus;
 
-    @Column(name = "identification_number", length = 50, nullable = false)
+    @Column(name = "identification_type", length = 30)
+    private String identificationType;
+
+    @Column(name = "identification_number", length = 50)
     private String identificationNumber;
 
-    @Column(name = "identification_number_hash", length = 255)
-    private String identificationNumberHash;
+    @Column(name = "issue_date")
+    private LocalDate issueDate;
 
-    @Column(name = "issued_date", nullable = false)
-    private LocalDate issuedDate;
+    @Column(name = "issuing_place", length = 120)
+    private String issuingPlace;
 
     @Column(name = "expiry_date")
     private LocalDate expiryDate;
 
-    @Column(name = "issuing_authority", length = 200, nullable = false)
-    private String issuingAuthority;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "residency_status", referencedColumnName = "residency_status_code", nullable = false)
+    private ResidencyStatus residencyStatus;
 
-    @Column(name = "issuing_country_id", length = 36, nullable = false)
-    private String issuingCountryId;
+    @Column(name = "successful_verification_date")
+    private LocalDate successfulVerificationDate;
 
-    @Column(name = "issuing_province_id", length = 36)
-    private String issuingProvinceId;
+    @Column(name = "id_update_count")
+    private Integer idUpdateCount;
 
-    @Column(name = "is_default", nullable = false)
-    @Builder.Default
-    private Boolean isDefault = false;
+    @Column(name = "last_id_update_date")
+    private LocalDate lastIdUpdateDate;
 
-    @Column(name = "is_verified", nullable = false)
-    @Builder.Default
-    private Boolean isVerified = false;
+    @Column(name = "watchlist_status", length = 20)
+    private String watchlistStatus;
 
-    @Column(name = "verification_date")
-    private LocalDateTime verificationDate;
+    @Column(name = "risk_rating", length = 10)
+    private String riskRating;
 
-    @Column(name = "verification_method", length = 50)
-    private String verificationMethod;
+    @Column(name = "last_screening_date")
+    private LocalDate lastScreeningDate;
 
-    @Column(name = "verification_reference", length = 100)
-    private String verificationReference;
+    @Column(name = "version_no", nullable = false)
+    private Integer versionNo;
 
-    @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "document_image_path", length = 500)
-    private String documentImagePath;
-
-    @Column(name = "ocr_extracted_data", columnDefinition = "TEXT")
-    private String ocrExtractedData;
-
-    @Column(name = "risk_score")
-    private Integer riskScore;
-
-    @Column(name = "blacklist_check_status", length = 20)
-    private String blacklistCheckStatus;
-
-    @Column(name = "blacklist_check_date")
-    private LocalDateTime blacklistCheckDate;
-
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
-    @CreatedDate
-    @Column(name = "created_date", updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
-
-    @Column(name = "created_by", length = 100, updatable = false)
+    @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    @Column(name = "last_modified_by", length = 100)
-    private String lastModifiedBy;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    // Constructor with required fields
-    public Identification(Customer customer, String identificationTypeId, 
-                         String identificationNumber, LocalDate issuedDate,
-                         String issuingAuthority, String issuingCountryId) {
-        this.customer = customer;
-        this.identificationTypeId = identificationTypeId;
-        this.identificationNumber = identificationNumber;
-        this.issuedDate = issuedDate;
-        this.issuingAuthority = issuingAuthority;
-        this.issuingCountryId = issuingCountryId;
-        this.isDefault = false;
-        this.isVerified = false;
-        this.isActive = true;
-    }
+    @Column(name = "updated_by", length = 50, nullable = false)
+    private String updatedBy;
 
-    // Business methods
-    public void updateIdentification(String identificationNumber, LocalDate issuedDate,
-                                   LocalDate expiryDate, String issuingAuthority,
-                                   String issuingCountryId, String issuingProvinceId) {
-        this.identificationNumber = identificationNumber;
-        this.issuedDate = issuedDate;
-        this.expiryDate = expiryDate;
-        this.issuingAuthority = issuingAuthority;
-        this.issuingCountryId = issuingCountryId;
-        this.issuingProvinceId = issuingProvinceId;
-    }
+    @Column(name = "source_app", length = 50)
+    private String sourceApp;
 
-    public void verify(String verificationMethod, String verificationReference) {
-        this.isVerified = true;
-        this.verificationDate = LocalDateTime.now();
-        this.verificationMethod = verificationMethod;
-        this.verificationReference = verificationReference;
-    }
+    @Column(name = "correlation_id", length = 50)
+    private String correlationId;
 
-    public void setAsDefault() {
-        this.isDefault = true;
-    }
-
-    public void unsetDefault() {
-        this.isDefault = false;
-    }
-
-    public void activate() {
-        this.isActive = true;
-    }
-
-    public void deactivate() {
-        this.isActive = false;
-    }
-
-    public boolean isExpired() {
-        return expiryDate != null && expiryDate.isBefore(LocalDate.now());
-    }
-
-    public boolean isExpiringSoon(int daysThreshold) {
-        if (expiryDate == null) return false;
-        return expiryDate.isBefore(LocalDate.now().plusDays(daysThreshold));
-    }
-
-    public void updateBlacklistCheck(String status) {
-        this.blacklistCheckStatus = status;
-        this.blacklistCheckDate = LocalDateTime.now();
-    }
-
-    public void updateRiskScore(Integer riskScore) {
-        this.riskScore = riskScore;
-    }
+    @OneToMany(mappedBy = "identification", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<IdentityDocument> identityDocuments;
 }

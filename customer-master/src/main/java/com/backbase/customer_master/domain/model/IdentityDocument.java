@@ -6,37 +6,29 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer_relationship")
+@Table(name = "identity_document")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CustomerRelationship {
+public class IdentityDocument {
     @Id
-    @Column(name = "relationship_id", nullable = false)
-    private UUID relationshipId;
+    @Column(name = "document_id", nullable = false)
+    private UUID documentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", nullable = false)
+    @JoinColumn(name = "identification_id", referencedColumnName = "identification_id", nullable = false)
+    private Identification identification;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "related_customer_id", referencedColumnName = "customer_id")
-    private Customer relatedCustomer;
+    @Column(name = "doc_type", length = 20, nullable = false)
+    private String docType;
 
-    @Column(name = "group_id")
-    private UUID groupId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "relationship_type", referencedColumnName = "relationship_type_code")
-    private RelationshipType relationshipType;
-
-    @Column(name = "rm_id", length = 20)
-    private String rmId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "managing_branch", referencedColumnName = "branch_code")
-    private Branch managingBranch;
+    @Column(name = "asset_id", nullable = false)
+    private UUID assetId;
 
     @Column(name = "status", length = 20, nullable = false)
     private String status;

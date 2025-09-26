@@ -2,58 +2,73 @@ package com.backbase.customer_master.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ward")
-@EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "district")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-class Ward {
-
+public class Ward {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "ward_id", length = 36)
-    @EqualsAndHashCode.Include
-    private String wardId;
-
-    @Column(name = "ward_code", length = 10, nullable = false)
-    private String wardCode;
-
-    @Column(name = "ward_name", length = 100, nullable = false)
-    private String wardName;
-
-    @Column(name = "ward_type", length = 50)
-    private String wardType;
+    @Column(name = "ward_id", nullable = false)
+    private UUID wardId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "district_id", nullable = false)
+    @JoinColumn(name = "country_code", referencedColumnName = "country_code", nullable = false)
+    private Country country;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_code", referencedColumnName = "province_code", nullable = false)
+    private Province province;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "district_code", referencedColumnName = "district_code", nullable = false)
     private District district;
 
-    @Column(name = "is_active", nullable = false)
-    @Builder.Default
-    private Boolean isActive = true;
+    @Column(name = "ward_code", length = 10, nullable = false, unique = true)
+    private String wardCode;
 
-    @Column(name = "sort_order")
-    private Integer sortOrder;
+    @Column(name = "ward_name", length = 120, nullable = false)
+    private String wardName;
 
-    @CreatedDate
-    @Column(name = "created_date", updatable = false)
-    private LocalDateTime createdDate;
+    @Column(name = "ward_name_local", length = 120)
+    private String wardNameLocal;
 
-    @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "postal_code", referencedColumnName = "postal_code")
+    private PostalCode postalCode;
+
+    @Column(name = "record_status", length = 20, nullable = false)
+    private String recordStatus;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "created_by", length = 50, nullable = false)
+    private String createdBy;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Column(name = "updated_by", length = 50, nullable = false)
+    private String updatedBy;
+
+    @Column(name = "source_app", length = 50)
+    private String sourceApp;
+
+    @Column(name = "correlation_id", length = 50)
+    private String correlationId;
+
+    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Address> addresses;
+
+    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Branch> branches;
+
+    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PostalCode> postalCodes;
 }

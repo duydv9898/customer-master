@@ -2,156 +2,55 @@ package com.backbase.customer_master.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-/**
- * Customer product entity for managing customer-product relationships
- */
 @Entity
 @Table(name = "customer_product")
-@EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "customer")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CustomerProduct {
-
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "customer_product_id", length = 36)
-    @EqualsAndHashCode.Include
-    private String customerProductId;
+    @Column(name = "customer_product_id", nullable = false)
+    private UUID customerProductId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "product_id", length = 36, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_group", referencedColumnName = "product_group_code", nullable = false)
+    private ProductGroup productGroup;
+
+    @Column(name = "product_name", length = 120, nullable = false)
+    private String productName;
+
+    @Column(name = "product_id", length = 20, nullable = false)
     private String productId;
 
-    @Column(name = "product_type", length = 50, nullable = false)
-    private String productType;
-
-    @Column(name = "account_number", length = 50)
-    private String accountNumber;
-
     @Column(name = "product_status", length = 20, nullable = false)
-    @Builder.Default
-    private String productStatus = "ACTIVE";
+    private String productStatus;
 
-    @Column(name = "opening_date")
-    private LocalDateTime openingDate;
+    @Column(name = "version_no", nullable = false)
+    private Integer versionNo;
 
-    @Column(name = "closing_date")
-    private LocalDateTime closingDate;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "current_balance")
-    private BigDecimal currentBalance;
-
-    @Column(name = "available_balance")
-    private BigDecimal availableBalance;
-
-    @Column(name = "credit_limit")
-    private BigDecimal creditLimit;
-
-    @Column(name = "interest_rate")
-    private BigDecimal interestRate;
-
-    @Column(name = "currency", length = 3)
-    @Builder.Default
-    private String currency = "VND";
-
-    @Column(name = "is_primary", nullable = false)
-    @Builder.Default
-    private Boolean isPrimary = false;
-
-    @Column(name = "branch_id", length = 36)
-    private String branchId;
-
-    @Column(name = "relationship_manager_id", length = 36)
-    private String relationshipManagerId;
-
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
-    @CreatedDate
-    @Column(name = "created_date", updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate;
-
-    @Column(name = "created_by", length = 100, updatable = false)
+    @Column(name = "created_by", length = 50, nullable = false)
     private String createdBy;
 
-    @Column(name = "last_modified_by", length = 100)
-    private String lastModifiedBy;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
-    // Constructor with required fields
-    public CustomerProduct(Customer customer, String productId, String productType, String accountNumber) {
-        this.customer = customer;
-        this.productId = productId;
-        this.productType = productType;
-        this.accountNumber = accountNumber;
-        this.productStatus = "ACTIVE";
-        this.isPrimary = false;
-        this.currency = "VND";
-        this.openingDate = LocalDateTime.now();
-    }
+    @Column(name = "updated_by", length = 50, nullable = false)
+    private String updatedBy;
 
-    // Business methods
-    public void activate() {
-        this.productStatus = "ACTIVE";
-        this.openingDate = LocalDateTime.now();
-        this.closingDate = null;
-    }
+    @Column(name = "source_app", length = 50)
+    private String sourceApp;
 
-    public void deactivate() {
-        this.productStatus = "INACTIVE";
-        this.closingDate = LocalDateTime.now();
-    }
-
-    public void close() {
-        this.productStatus = "CLOSED";
-        this.closingDate = LocalDateTime.now();
-    }
-
-    public void suspend() {
-        this.productStatus = "SUSPENDED";
-    }
-
-    public void setAsPrimary() {
-        this.isPrimary = true;
-    }
-
-    public void unsetPrimary() {
-        this.isPrimary = false;
-    }
-
-    public boolean isActive() {
-        return "ACTIVE".equals(productStatus);
-    }
-
-    public void updateBalance(BigDecimal currentBalance, BigDecimal availableBalance) {
-        this.currentBalance = currentBalance;
-        this.availableBalance = availableBalance;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (openingDate == null) {
-            openingDate = LocalDateTime.now();
-        }
-    }
+    @Column(name = "correlation_id", length = 50)
+    private String correlationId;
 }

@@ -3,36 +3,40 @@ package com.backbase.customer_master.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "district")
+@Table(name = "postal_code")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class District {
+public class PostalCode {
     @Id
-    @Column(name = "district_id", nullable = false)
-    private UUID districtId;
+    @Column(name = "postal_code_id", nullable = false)
+    private UUID postalCodeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "country_code", referencedColumnName = "country_code", nullable = false)
     private Country country;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_code", referencedColumnName = "province_code", nullable = false)
+    @JoinColumn(name = "province_code", referencedColumnName = "province_code")
     private Province province;
 
-    @Column(name = "district_code", length = 10, nullable = false, unique = true)
-    private String districtCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "district_code", referencedColumnName = "district_code")
+    private District district;
 
-    @Column(name = "district_name", length = 120, nullable = false)
-    private String districtName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_code", referencedColumnName = "ward_code")
+    private Ward ward;
 
-    @Column(name = "district_name_local", length = 120)
-    private String districtNameLocal;
+    @Column(name = "postal_code", length = 10, nullable = false)
+    private String postalCode;
+
+    @Column(name = "postal_name", length = 120)
+    private String postalName;
 
     @Column(name = "record_status", length = 20, nullable = false)
     private String recordStatus;
@@ -54,16 +58,4 @@ public class District {
 
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
-
-    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Address> addresses;
-
-    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Branch> branches;
-
-    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Ward> wards;
-
-    @OneToMany(mappedBy = "district", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PostalCode> postalCodes;
 }

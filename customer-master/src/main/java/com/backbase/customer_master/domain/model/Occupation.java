@@ -7,24 +7,28 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "client_type")
+@Table(name = "occupation")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClientType {
+public class Occupation {
     @Id
-    @Column(name = "client_type_id", nullable = false)
-    private UUID clientTypeId;
+    @Column(name = "occupation_id", nullable = false)
+    private UUID occupationId;
 
-    @Column(name = "client_type_code", length = 20, nullable = false, unique = true)
-    private String clientTypeCode;
+    @Column(name = "occupation_code", length = 20, nullable = false, unique = true)
+    private String occupationCode;
 
-    @Column(name = "client_type_name", length = 100, nullable = false)
-    private String clientTypeName;
+    @Column(name = "occupation_name", length = 100, nullable = false)
+    private String occupationName;
 
-    @Column(name = "client_type_local", length = 100)
-    private String clientTypeLocal;
+    @Column(name = "occupation_local", length = 100)
+    private String occupationLocal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "industry_code", referencedColumnName = "industry_code")
+    private Industry industry;
 
     @Column(name = "description", length = 255)
     private String description;
@@ -50,6 +54,6 @@ public class ClientType {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "clientType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "occupation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Customer> customers;
 }
