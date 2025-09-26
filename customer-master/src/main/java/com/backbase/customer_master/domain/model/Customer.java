@@ -29,6 +29,8 @@ import java.util.UUID;
 public class Customer {
 
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "customer_id", length = 36)
     @EqualsAndHashCode.Include
     private String customerId;
