@@ -2,90 +2,34 @@ spring:
   application:
     name: customer-master-api
 
-  profiles:
-    active: dev
-
-  # Database Configuration
+  # Database Configuration - MySQL local
   datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: password
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
+    url: jdbc:mysql://localhost:3306/customer_master_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: appuser
+    password: apppass
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
 
   # JPA Configuration
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
-      ddl-auto: create-drop
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.SnakeCasePhysicalNamingStrategy
+      ddl-auto: update   # dùng update cho local dev, đỡ phải tạo bảng tay
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        generate_statistics: false
-        jdbc:
-          batch_size: 25
-        order_inserts: true
-        order_updates: true
-        batch_versioned_data: true
-
-  # Jackson Configuration
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
-      indent-output: true
-    deserialization:
-      fail-on-unknown-properties: false
-    default-property-inclusion: non_null
-
-  # Validation Configuration
-  mvc:
-    throw-exception-if-no-handler-found: true
-  web:
-    resources:
-      add-mappings: false
 
 # Server Configuration
 server:
   port: 8080
   servlet:
     context-path: /
-  error:
-    include-message: always
-    include-binding-errors: always
-    include-stacktrace: on_param
-    include-exception: false
-
-# Management (Actuator) Configuration
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: when-authorized
-  info:
-    env:
-      enabled: true
-
-# Application Information
-info:
-  app:
-    name: Customer Master API
-    description: Customer Master Database Management System
-    version: 1.0.0
-    encoding: UTF-8
-    java:
-      version: 17
 
 # Logging Configuration
 logging:
@@ -97,115 +41,3 @@ logging:
     org.springframework.web: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/customer-master-api.log
-
-# SpringDoc OpenAPI Configuration
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
-    tryItOutEnabled: true
-    filter: true
-    syntax-highlight:
-      activated: true
-  show-actuator: true
-  group-configs:
-    - group: 'customer-api'
-      display-name: 'Customer Management API'
-      paths-to-match: '/api/v1/customers/**'
-    - group: 'reference-api'
-      display-name: 'Reference Data API'
-      paths-to-match: '/api/v1/reference/**'
-
----
-# Development Profile
-spring:
-  config:
-    activate:
-      on-profile: dev
-
-  # H2 Database for development
-  datasource:
-    url: jdbc:h2:mem:devdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-
-  # Enable H2 Console
-  h2:
-    console:
-      enabled: true
-
-logging:
-  level:
-    com.example.myapp: DEBUG
-
----
-# Test Profile
-spring:
-  config:
-    activate:
-      on-profile: test
-
-  # H2 Database for testing
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: false
-
-logging:
-  level:
-    com.example.myapp: INFO
-    root: WARN
-
----
-# Production Profile
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-  # MySQL Database for production
-  datasource:
-    url: jdbc:mysql://localhost:3306/customer_master_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:customer_user}
-    password: ${DB_PASSWORD:password}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      idle-timeout: 300000
-      max-lifetime: 1200000
-      connection-timeout: 20000
-
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-
-  h2:
-    console:
-      enabled: false
-
-# Production logging
-logging:
-  level:
-    com.example.myapp: INFO
-    org.springframework.security: WARN
-    org.hibernate: WARN
-    root: WARN
-  file:
-    name: /var/log/customer-master-api/application.log

@@ -174,24 +174,24 @@ public class CustomerQueryService {
     /**
      * Get PEP customers
      */
-    public List<CustomerDTO> getPepCustomers() {
-        log.debug("Processing get PEP customers query");
-        
-        GetPepCustomersQuery query = GetPepCustomersQuery.builder().build();
-        
-        return customerQueryHandler.handle(query);
-    }
-
-    /**
-     * Get customers in sanctions list
-     */
-    public List<CustomerDTO> getSanctionsListCustomers() {
-        log.debug("Processing get sanctions list customers query");
-        
-        GetSanctionsListCustomersQuery query = GetSanctionsListCustomersQuery.builder().build();
-        
-        return customerQueryHandler.handle(query);
-    }
+//    public List<CustomerDTO> getPepCustomers() {
+//        log.debug("Processing get PEP customers query");
+//
+//        GetPepCustomersQuery query = GetPepCustomersQuery.builder().build();
+//
+//        return customerQueryHandler.handle(query);
+//    }
+//
+//    /**
+//     * Get customers in sanctions list
+//     */
+//    public List<CustomerDTO> getSanctionsListCustomers() {
+//        log.debug("Processing get sanctions list customers query");
+//
+//        GetSanctionsListCustomersQuery query = GetSanctionsListCustomersQuery.builder().build();
+//
+//        return customerQueryHandler.handle(query);
+//    }
 
     /**
      * Get customers created in date range

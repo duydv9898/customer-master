@@ -141,22 +141,22 @@ public class CustomerQueryHandler {
     /**
      * Handle GetPepCustomersQuery
      */
-    public List<CustomerDTO> handle(GetPepCustomersQuery query) {
-        log.debug("Handling GetPepCustomersQuery");
-        
-        List<Customer> customers = customerRepository.findPepCustomers();
-        return customerMapper.toDTOList(customers);
-    }
-
-    /**
-     * Handle GetSanctionsListCustomersQuery
-     */
-    public List<CustomerDTO> handle(GetSanctionsListCustomersQuery query) {
-        log.debug("Handling GetSanctionsListCustomersQuery");
-        
-        List<Customer> customers = customerRepository.findSanctionsListCustomers();
-        return customerMapper.toDTOList(customers);
-    }
+//    public List<CustomerDTO> handle(GetPepCustomersQuery query) {
+//        log.debug("Handling GetPepCustomersQuery");
+//
+//        List<Customer> customers = customerRepository.findPepCustomers();
+//        return customerMapper.toDTOList(customers);
+//    }
+//
+//    /**
+//     * Handle GetSanctionsListCustomersQuery
+//     */
+//    public List<CustomerDTO> handle(GetSanctionsListCustomersQuery query) {
+//        log.debug("Handling GetSanctionsListCustomersQuery");
+//
+//        List<Customer> customers = customerRepository.findSanctionsListCustomers();
+//        return customerMapper.toDTOList(customers);
+//    }
 
     /**
      * Handle GetCustomersCreatedInRangeQuery

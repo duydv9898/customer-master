@@ -31,6 +31,7 @@ public interface CustomerMapper {
     /**
      * Map Customer entity to summary DTO (minimal fields for lists)
      */
+    @Named("toSummaryDTO")  // Thêm qualifier này để reference trong iterable mapping
     @Mapping(target = "addressDTOs", ignore = true)
     @Mapping(target = "identificationDTOs", ignore = true)
     @Mapping(target = "placeOfBirth", ignore = true)
@@ -49,6 +50,7 @@ public interface CustomerMapper {
     /**
      * Map list of Customer entities to DTOs
      */
+    @IterableMapping(qualifiedByName = "toSummaryDTO")  // Thêm annotation này để chỉ định phương thức mapping cho từng phần tử
     List<CustomerDTO> toDTOList(List<Customer> customers);
 
     /**

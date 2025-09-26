@@ -55,16 +55,16 @@ public class CustomerProduct {
     @Column(name = "closing_date")
     private LocalDateTime closingDate;
 
-    @Column(name = "current_balance", precision = 19, scale = 2)
+    @Column(name = "current_balance")
     private BigDecimal currentBalance;
 
-    @Column(name = "available_balance", precision = 19, scale = 2)
+    @Column(name = "available_balance")
     private BigDecimal availableBalance;
 
-    @Column(name = "credit_limit", precision = 19, scale = 2)
+    @Column(name = "credit_limit")
     private BigDecimal creditLimit;
 
-    @Column(name = "interest_rate", precision = 8, scale = 4)
+    @Column(name = "interest_rate")
     private BigDecimal interestRate;
 
     @Column(name = "currency", length = 3)

@@ -215,29 +215,29 @@ public class CustomerQueryController {
         return ResponseEntity.ok(customers);
     }
 
-    @Operation(summary = "Get PEP customers", description = "Retrieves all Politically Exposed Person (PEP) customers")
-    @ApiResponse(responseCode = "200", description = "PEP customers found")
-    @GetMapping("/pep")
-    public ResponseEntity<List<CustomerDTO>> getPepCustomers() {
-        log.info("Retrieving PEP customers");
-        
-        GetPepCustomersQuery query = GetPepCustomersQuery.builder().build();
-        
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
-    }
-
-    @Operation(summary = "Get sanctions list customers", description = "Retrieves all customers in sanctions list")
-    @ApiResponse(responseCode = "200", description = "Sanctions list customers found")
-    @GetMapping("/sanctions")
-    public ResponseEntity<List<CustomerDTO>> getSanctionsListCustomers() {
-        log.info("Retrieving sanctions list customers");
-        
-        GetSanctionsListCustomersQuery query = GetSanctionsListCustomersQuery.builder().build();
-        
-        List<CustomerDTO> customers = customerQueryHandler.handle(query);
-        return ResponseEntity.ok(customers);
-    }
+//    @Operation(summary = "Get PEP customers", description = "Retrieves all Politically Exposed Person (PEP) customers")
+//    @ApiResponse(responseCode = "200", description = "PEP customers found")
+//    @GetMapping("/pep")
+//    public ResponseEntity<List<CustomerDTO>> getPepCustomers() {
+//        log.info("Retrieving PEP customers");
+//
+//        GetPepCustomersQuery query = GetPepCustomersQuery.builder().build();
+//
+//        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+//        return ResponseEntity.ok(customers);
+//    }
+//
+//    @Operation(summary = "Get sanctions list customers", description = "Retrieves all customers in sanctions list")
+//    @ApiResponse(responseCode = "200", description = "Sanctions list customers found")
+//    @GetMapping("/sanctions")
+//    public ResponseEntity<List<CustomerDTO>> getSanctionsListCustomers() {
+//        log.info("Retrieving sanctions list customers");
+//
+//        GetSanctionsListCustomersQuery query = GetSanctionsListCustomersQuery.builder().build();
+//
+//        List<CustomerDTO> customers = customerQueryHandler.handle(query);
+//        return ResponseEntity.ok(customers);
+//    }
 
     @Operation(summary = "Get customers created in date range", description = "Retrieves customers created within a specific date range")
     @ApiResponse(responseCode = "200", description = "Customers found")
