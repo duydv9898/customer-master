@@ -297,9 +297,9 @@ public class CustomerQueryController {
             @Parameter(description = "Risk level") @PathVariable String riskLevel) {
         log.info("Retrieving customers by risk level: {}", riskLevel);
         
-        GetCustomersByRiskLevelQuery query = GetCustomersByRiskLevelQuery.builder()
-                .riskLevel(riskLevel)
-                .build();
+//        GetCustomersByRiskLevelQuery query = GetCustomersByRiskLevelQuery.builder()
+//                .riskLevel(riskLevel)
+//                .build();
         
         List<CustomerDTO> customers = customerQueryService.getCustomersByRiskLevel(riskLevel);
         return ResponseEntity.ok(customers);

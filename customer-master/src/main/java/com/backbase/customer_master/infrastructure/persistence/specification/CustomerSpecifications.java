@@ -1,8 +1,6 @@
 package com.backbase.customer_master.infrastructure.persistence.specification;
 
-import com.backbase.customer_master.domain.model.Customer;
-import com.backbase.customer_master.domain.model.Address;
-import com.backbase.customer_master.domain.model.Identification;
+import com.backbase.customer_master.domain.model.*;
 import jakarta.persistence.criteria.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,9 +11,56 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JPA Specifications for Customer entity queries
+ * JPA Specifications for Customer entity với fetch joins để lấy đủ dữ liệu
  */
-public class CustomerSpecification {
+public class CustomerSpecifications {
+
+    /**
+     * Base specification với fetch joins cho các entity liên quan
+     */
+    public static Specification<Customer> withAllRelatedData() {
+        return (root, query, criteriaBuilder) -> {
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                // Tránh fetch join khi count query
+                root.fetch("addresses", JoinType.LEFT);
+                root.fetch("identifications", JoinType.LEFT);
+                root.fetch("products", JoinType.LEFT);
+                root.fetch("relationships", JoinType.LEFT);
+                query.distinct(true);
+            }
+            return criteriaBuilder.conjunction();
+        };
+    }
+
+    /**
+     * Base specification với fetch joins cho dữ liệu cơ bản
+     */
+    public static Specification<Customer> withBasicRelatedData() {
+        return (root, query, criteriaBuilder) -> {
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                root.fetch("addresses", JoinType.LEFT);
+                root.fetch("identifications", JoinType.LEFT);
+                query.distinct(true);
+            }
+            return criteriaBuilder.conjunction();
+        };
+    }
+
+    /**
+     * Specification cho summary view (chỉ default address)
+     */
+    public static Specification<Customer> withSummaryData() {
+        return (root, query, criteriaBuilder) -> {
+            if (query.getResultType() != Long.class && query.getResultType() != long.class) {
+                // Fetch chỉ default address
+                Fetch<Customer, Address> addressFetch = root.fetch("addresses", JoinType.LEFT);
+                query.distinct(true);
+            }
+            return criteriaBuilder.conjunction();
+        };
+    }
+
+    // Customer field specifications
 
     /**
      * Find customers by customer ID (CIF)
@@ -34,7 +79,7 @@ public class CustomerSpecification {
      */
     public static Specification<Customer> hasCustomerType(String customerType) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(customerType)) {
+            if (customerType == null) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("customerType"), customerType);
@@ -57,59 +102,38 @@ public class CustomerSpecification {
     }
 
     /**
-     * Find customers by first name (case-insensitive, partial match)
+     * Find customers by email hash (for encrypted search)
      */
-    public static Specification<Customer> hasFirstNameContaining(String firstName) {
+    public static Specification<Customer> hasEmailHash(String emailHash) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(firstName)) {
+            if (StringUtils.isBlank(emailHash)) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("firstName")),
-                "%" + firstName.toLowerCase() + "%"
-            );
+            return criteriaBuilder.equal(root.get("emailHash"), emailHash);
         };
     }
 
     /**
-     * Find customers by last name (case-insensitive, partial match)
+     * Find customers by phone hash (for encrypted search)
      */
-    public static Specification<Customer> hasLastNameContaining(String lastName) {
+    public static Specification<Customer> hasPhoneHash(String phoneHash) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(lastName)) {
+            if (StringUtils.isBlank(phoneHash)) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.like(
-                criteriaBuilder.lower(root.get("lastName")),
-                "%" + lastName.toLowerCase() + "%"
-            );
+            return criteriaBuilder.equal(root.get("phoneHash"), phoneHash);
         };
     }
 
     /**
-     * Find customers by email (case-insensitive)
+     * Find customers by tax ID hash (for encrypted search)
      */
-    public static Specification<Customer> hasEmail(String email) {
+    public static Specification<Customer> hasTaxIdHash(String taxIdHash) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(email)) {
+            if (StringUtils.isBlank(taxIdHash)) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.equal(
-                criteriaBuilder.lower(root.get("email")),
-                email.toLowerCase()
-            );
-        };
-    }
-
-    /**
-     * Find customers by phone number
-     */
-    public static Specification<Customer> hasPhoneNumber(String phoneNumber) {
-        return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(phoneNumber)) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("phoneNumber"), phoneNumber);
+            return criteriaBuilder.equal(root.get("taxIdHash"), taxIdHash);
         };
     }
 
@@ -149,7 +173,7 @@ public class CustomerSpecification {
      */
     public static Specification<Customer> hasCifStatus(String cifStatus) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(cifStatus)) {
+            if (cifStatus == null) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("cifStatus"), cifStatus);
@@ -173,7 +197,7 @@ public class CustomerSpecification {
      */
     public static Specification<Customer> hasCustomerSegment(String customerSegment) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(customerSegment)) {
+            if (customerSegment == null) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("customerSegment"), customerSegment);
@@ -197,7 +221,7 @@ public class CustomerSpecification {
      */
     public static Specification<Customer> hasKycStatus(String kycStatus) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(kycStatus)) {
+            if (kycStatus == null) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("kycStatus"), kycStatus);
@@ -209,7 +233,7 @@ public class CustomerSpecification {
      */
     public static Specification<Customer> hasRiskLevel(String riskLevel) {
         return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(riskLevel)) {
+            if (riskLevel == null) {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("riskLevel"), riskLevel);
@@ -237,73 +261,6 @@ public class CustomerSpecification {
                 return criteriaBuilder.conjunction();
             }
             return criteriaBuilder.equal(root.get("isSanctionsList"), isSanctionsList);
-        };
-    }
-
-    /**
-     * Find customers by identification number
-     */
-    public static Specification<Customer> hasIdentificationNumber(String identificationNumber) {
-        return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(identificationNumber)) {
-                return criteriaBuilder.conjunction();
-            }
-            
-            Join<Customer, Identification> identificationJoin = root.join("identifications", JoinType.INNER);
-            return criteriaBuilder.equal(identificationJoin.get("identificationNumber"), identificationNumber);
-        };
-    }
-
-    /**
-     * Find customers by address details (province, district)
-     */
-    public static Specification<Customer> hasAddressInProvince(String provinceId) {
-        return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(provinceId)) {
-                return criteriaBuilder.conjunction();
-            }
-            
-            Join<Customer, Address> addressJoin = root.join("addresses", JoinType.INNER);
-            return criteriaBuilder.and(
-                criteriaBuilder.equal(addressJoin.get("provinceId"), provinceId),
-                criteriaBuilder.equal(addressJoin.get("isActive"), true)
-            );
-        };
-    }
-
-    /**
-     * Find customers by address district
-     */
-    public static Specification<Customer> hasAddressInDistrict(String districtId) {
-        return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(districtId)) {
-                return criteriaBuilder.conjunction();
-            }
-            
-            Join<Customer, Address> addressJoin = root.join("addresses", JoinType.INNER);
-            return criteriaBuilder.and(
-                criteriaBuilder.equal(addressJoin.get("districtId"), districtId),
-                criteriaBuilder.equal(addressJoin.get("isActive"), true)
-            );
-        };
-    }
-
-    /**
-     * Find customers created between dates
-     */
-    public static Specification<Customer> createdBetween(LocalDateTime fromDate, LocalDateTime toDate) {
-        return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            
-            if (fromDate != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdDate"), fromDate));
-            }
-            
-            if (toDate != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdDate"), toDate));
-            }
-            
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 
@@ -358,6 +315,111 @@ public class CustomerSpecification {
         };
     }
 
+    // Related entity specifications
+
+    /**
+     * Find customers by identification number
+     */
+    public static Specification<Customer> hasIdentificationNumber(String identificationNumber) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(identificationNumber)) {
+                return criteriaBuilder.conjunction();
+            }
+            
+            Join<Customer, Identification> identificationJoin = root.join("identifications", JoinType.INNER);
+            return criteriaBuilder.and(
+                criteriaBuilder.equal(identificationJoin.get("identificationNumber"), identificationNumber),
+                criteriaBuilder.equal(identificationJoin.get("isActive"), true)
+            );
+        };
+    }
+
+    /**
+     * Find customers by address details (province, district)
+     */
+    public static Specification<Customer> hasAddressInProvince(String provinceId) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(provinceId)) {
+                return criteriaBuilder.conjunction();
+            }
+            
+            Join<Customer, Address> addressJoin = root.join("addresses", JoinType.INNER);
+            return criteriaBuilder.and(
+                criteriaBuilder.equal(addressJoin.get("provinceId"), provinceId),
+                criteriaBuilder.equal(addressJoin.get("isActive"), true)
+            );
+        };
+    }
+
+    /**
+     * Find customers by address district
+     */
+    public static Specification<Customer> hasAddressInDistrict(String districtId) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(districtId)) {
+                return criteriaBuilder.conjunction();
+            }
+            
+            Join<Customer, Address> addressJoin = root.join("addresses", JoinType.INNER);
+            return criteriaBuilder.and(
+                criteriaBuilder.equal(addressJoin.get("districtId"), districtId),
+                criteriaBuilder.equal(addressJoin.get("isActive"), true)
+            );
+        };
+    }
+
+    /**
+     * Find customers with specific product type
+     */
+    public static Specification<Customer> hasProductType(String productType) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(productType)) {
+                return criteriaBuilder.conjunction();
+            }
+            
+            Join<Customer, CustomerProduct> productJoin = root.join("products", JoinType.INNER);
+            return criteriaBuilder.and(
+                criteriaBuilder.equal(productJoin.get("productType"), productType),
+                criteriaBuilder.equal(productJoin.get("productStatus"), "ACTIVE")
+            );
+        };
+    }
+
+    // Date and time specifications
+
+    /**
+     * Find customers created between dates
+     */
+    public static Specification<Customer> createdBetween(LocalDateTime fromDate, LocalDateTime toDate) {
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            
+            if (fromDate != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdDate"), fromDate));
+            }
+            
+            if (toDate != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("createdDate"), toDate));
+            }
+            
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    /**
+     * Find customers modified after certain date
+     */
+    public static Specification<Customer> modifiedAfter(LocalDateTime afterDate) {
+        return (root, query, criteriaBuilder) -> {
+            if (afterDate == null) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.greaterThan(root.get("lastModifiedDate"), afterDate);
+        };
+    }
+
+    // Status and compliance specifications
+
     /**
      * Find customers with active status
      */
@@ -367,25 +429,26 @@ public class CustomerSpecification {
     }
 
     /**
-     * Complex search combining multiple criteria
+     * Find customers with inactive or suspended status
      */
-    public static Specification<Customer> complexSearch(String searchTerm) {
-        return (root, query, criteriaBuilder) -> {
-            if (StringUtils.isBlank(searchTerm)) {
-                return criteriaBuilder.conjunction();
-            }
-            
-            String likePattern = "%" + searchTerm.toLowerCase() + "%";
-            
-            return criteriaBuilder.or(
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("customerId")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("fullName")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), likePattern),
-                criteriaBuilder.like(criteriaBuilder.lower(root.get("email")), likePattern),
-                criteriaBuilder.like(root.get("phoneNumber"), likePattern)
+    public static Specification<Customer> isInactiveOrSuspended() {
+        return (root, query, criteriaBuilder) -> 
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get("cifStatus"), "INACTIVE"),
+                criteriaBuilder.equal(root.get("cifStatus"), "SUSPENDED")
             );
-        };
+    }
+
+    /**
+     * Find high-risk customers
+     */
+    public static Specification<Customer> isHighRisk() {
+        return (root, query, criteriaBuilder) -> 
+            criteriaBuilder.or(
+                criteriaBuilder.equal(root.get("riskLevel"), "HIGH"),
+                criteriaBuilder.equal(root.get("isPep"), true),
+                criteriaBuilder.equal(root.get("isSanctionsList"), true)
+            );
     }
 
     /**
@@ -413,6 +476,76 @@ public class CustomerSpecification {
                 criteriaBuilder.between(identificationJoin.get("expiryDate"), LocalDate.now(), futureDate),
                 criteriaBuilder.equal(identificationJoin.get("isActive"), true)
             );
+        };
+    }
+
+    // Complex search specifications
+
+    /**
+     * Complex search combining multiple criteria
+     */
+    public static Specification<Customer> complexSearch(String searchTerm) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(searchTerm)) {
+                return criteriaBuilder.conjunction();
+            }
+            
+            String likePattern = "%" + searchTerm.toLowerCase() + "%";
+            
+            return criteriaBuilder.or(
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("customerId")), likePattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("fullName")), likePattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), likePattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), likePattern),
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("occupation")), likePattern)
+            );
+        };
+    }
+
+    /**
+     * Find customers requiring KYC renewal
+     */
+    public static Specification<Customer> requiresKycRenewal(LocalDateTime cutoffDate) {
+        return (root, query, criteriaBuilder) -> {
+            return criteriaBuilder.and(
+                criteriaBuilder.equal(root.get("cifStatus"), "ACTIVE"),
+                criteriaBuilder.or(
+                    criteriaBuilder.isNull(root.get("lastModifiedDate")),
+                    criteriaBuilder.lessThan(root.get("lastModifiedDate"), cutoffDate)
+                )
+            );
+        };
+    }
+
+    /**
+     * Exclude closed customers (default filter)
+     */
+    public static Specification<Customer> excludeClosed() {
+        return (root, query, criteriaBuilder) -> 
+            criteriaBuilder.notEqual(root.get("cifStatus"), "CLOSED");
+    }
+
+    /**
+     * Filter by created by user
+     */
+    public static Specification<Customer> createdBy(String createdBy) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(createdBy)) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("createdBy"), createdBy);
+        };
+    }
+
+    /**
+     * Filter by last modified by user
+     */
+    public static Specification<Customer> lastModifiedBy(String lastModifiedBy) {
+        return (root, query, criteriaBuilder) -> {
+            if (StringUtils.isBlank(lastModifiedBy)) {
+                return criteriaBuilder.conjunction();
+            }
+            return criteriaBuilder.equal(root.get("lastModifiedBy"), lastModifiedBy);
         };
     }
 }
