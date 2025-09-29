@@ -4,7 +4,6 @@ import com.backbase.customer_master.domain.model.Customer;
 import com.backbase.customer_master.domain.repository.CustomerRepository;
 import com.backbase.customer_master.infrastructure.persistence.mapper.CustomerMapper;
 import com.backbase.customer_master.infrastructure.persistence.specification.CustomerSpecifications;
-
 import com.backbase.customer_master.presentation.dto.CustomerDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +17,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * Customer Domain Service sử dụng JPA Specifications
- * Trả về CustomerDTO với đầy đủ thông tin từ fetch joins
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,70 +30,71 @@ public class CustomerDomainService {
     private final CustomerMapper customerMapper;
 
     /**
-     * Find customer by ID với tất cả dữ liệu liên quan
+     * Find customer by ID with all related data
      */
-    public Optional<CustomerDTO> findCustomerById(String customerId) {
+    public Optional<CustomerDTO> findCustomerById(UUID customerId) {
         log.debug("Finding customer by ID: {}", customerId);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withAllRelatedData())
                 .and(CustomerSpecifications.hasCustomerId(customerId))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findOne(spec)
                 .map(customerMapper::toDTO);
     }
 
     /**
-     * Find customer by ID với dữ liệu cơ bản
+     * Find customer by ID with basic data
      */
-    public Optional<CustomerDTO> findCustomerBasicById(String customerId) {
+    public Optional<CustomerDTO> findCustomerBasicById(UUID customerId) {
         log.debug("Finding customer basic info by ID: {}", customerId);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withBasicRelatedData())
                 .and(CustomerSpecifications.hasCustomerId(customerId))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findOne(spec)
                 .map(customerMapper::toBasicDTO);
     }
 
     /**
-     * Find customer by email với tất cả dữ liệu
+     * Find customer by email
      */
     public Optional<CustomerDTO> findCustomerByEmail(String email) {
         log.debug("Finding customer by email");
-        
+
         if (email == null || email.trim().isEmpty()) {
             return Optional.empty();
         }
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasEmailHash(email.toLowerCase()))
+                .and(CustomerSpecifications.hasEmail(email.toLowerCase()))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findOne(spec)
                 .map(customerMapper::toDTO);
     }
 
     /**
-     * Find customer by phone number với tất cả dữ liệu
+     * Find customer by phone number
      */
     public Optional<CustomerDTO> findCustomerByPhoneNumber(String phoneNumber) {
         log.debug("Finding customer by phone number");
-        
+
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
             return Optional.empty();
         }
-        
+
         String normalizedPhone = normalizePhoneNumber(phoneNumber);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasPhoneHash(normalizedPhone))
+                .and(CustomerSpecifications.hasPrimaryPhone(normalizedPhone))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findOne(spec)
                 .map(customerMapper::toDTO);
     }
@@ -107,70 +104,70 @@ public class CustomerDomainService {
      */
     public Optional<CustomerDTO> findCustomerByIdentificationNumber(String identificationNumber) {
         log.debug("Finding customer by identification number");
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withAllRelatedData())
                 .and(CustomerSpecifications.hasIdentificationNumber(identificationNumber))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findOne(spec)
                 .map(customerMapper::toDTO);
     }
 
     /**
-     * Get all customers với pagination (summary view)
+     * Find customer by tax file number
+     */
+    public Optional<CustomerDTO> findCustomerByTaxFileNo(String taxFileNo) {
+        log.debug("Finding customer by tax file number");
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withAllRelatedData())
+                .and(CustomerSpecifications.hasTaxFileNo(taxFileNo))
+                .and(CustomerSpecifications.excludeClosed());
+
+        return customerRepository.findOne(spec)
+                .map(customerMapper::toDTO);
+    }
+
+    /**
+     * Get all customers with pagination
      */
     public Page<CustomerDTO> findAllCustomers(Pageable pageable) {
         log.debug("Finding all customers with pagination");
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findAll(spec, pageable)
                 .map(customerMapper::toSummaryDTO);
     }
 
     /**
-     * Find customers by status
+     * Find customers by CIF status
      */
     public Page<CustomerDTO> findCustomersByStatus(String status, Pageable pageable) {
         log.debug("Finding customers by status: {}", status);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
                 .and(CustomerSpecifications.hasCifStatus(status));
-        
+
         return customerRepository.findAll(spec, pageable)
                 .map(customerMapper::toSummaryDTO);
     }
 
     /**
-     * Find customers by branch
+     * Find customers by client type
      */
-    public Page<CustomerDTO> findCustomersByBranch(String branchId, Pageable pageable) {
-        log.debug("Finding customers by branch: {}", branchId);
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withSummaryData())
-                .and(CustomerSpecifications.hasBranchId(branchId))
-                .and(CustomerSpecifications.isActive());
-        
-        return customerRepository.findAll(spec, pageable)
-                .map(customerMapper::toSummaryDTO);
-    }
+    public Page<CustomerDTO> findCustomersByType(String clientTypeCode, Pageable pageable) {
+        log.debug("Finding customers by client type: {}", clientTypeCode);
 
-    /**
-     * Find customers by type
-     */
-    public Page<CustomerDTO> findCustomersByType(String customerType, Pageable pageable) {
-        log.debug("Finding customers by type: {}", customerType);
-        
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
-                .and(CustomerSpecifications.hasCustomerType(customerType))
+                .and(CustomerSpecifications.hasClientTypeCode(clientTypeCode))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findAll(spec, pageable)
                 .map(customerMapper::toSummaryDTO);
     }
@@ -180,12 +177,12 @@ public class CustomerDomainService {
      */
     public Page<CustomerDTO> searchCustomersByName(String name, Pageable pageable) {
         log.debug("Searching customers by name: {}", name);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
                 .and(CustomerSpecifications.hasFullNameContaining(name))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findAll(spec, pageable)
                 .map(customerMapper::toSummaryDTO);
     }
@@ -193,14 +190,29 @@ public class CustomerDomainService {
     /**
      * Find customers by segment
      */
-    public Page<CustomerDTO> findCustomersBySegment(String customerSegment, Pageable pageable) {
-        log.debug("Finding customers by segment: {}", customerSegment);
-        
+    public Page<CustomerDTO> findCustomersBySegment(String segmentCode, Pageable pageable) {
+        log.debug("Finding customers by segment: {}", segmentCode);
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
-                .and(CustomerSpecifications.hasCustomerSegment(customerSegment))
+                .and(CustomerSpecifications.hasSegmentCode(segmentCode))
                 .and(CustomerSpecifications.isActive());
-        
+
+        return customerRepository.findAll(spec, pageable)
+                .map(customerMapper::toSummaryDTO);
+    }
+
+    /**
+     * Find customers by category
+     */
+    public Page<CustomerDTO> findCustomersByCategory(String categoryCode, Pageable pageable) {
+        log.debug("Finding customers by category: {}", categoryCode);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withSummaryData())
+                .and(CustomerSpecifications.hasCategoryCode(categoryCode))
+                .and(CustomerSpecifications.excludeClosed());
+
         return customerRepository.findAll(spec, pageable)
                 .map(customerMapper::toSummaryDTO);
     }
@@ -210,12 +222,12 @@ public class CustomerDomainService {
      */
     public List<CustomerDTO> findCustomersByDateOfBirthRange(LocalDate startDate, LocalDate endDate) {
         log.debug("Finding customers by date of birth range: {} to {}", startDate, endDate);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withBasicRelatedData())
                 .and(CustomerSpecifications.hasDateOfBirthBetween(startDate, endDate))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
                 .map(customerMapper::toBasicDTO)
@@ -223,87 +235,172 @@ public class CustomerDomainService {
     }
 
     /**
-     * Find customers by relationship manager
+     * Find customers by occupation
      */
-    public List<CustomerDTO> findCustomersByRelationshipManager(String relationshipManagerId) {
-        log.debug("Finding customers by relationship manager: {}", relationshipManagerId);
-        
+    public List<CustomerDTO> findCustomersByOccupation(String occupationCode) {
+        log.debug("Finding customers by occupation: {}", occupationCode);
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withSummaryData())
-                .and(CustomerSpecifications.hasRelationshipManagerId(relationshipManagerId))
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasOccupationCode(occupationCode))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toSummaryDTO)
+                .map(customerMapper::toBasicDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Find PEP customers với compliance data
+     * Find customers by industry
      */
-    public List<CustomerDTO> findPepCustomers() {
-        log.debug("Finding PEP customers");
-        
+    public List<CustomerDTO> findCustomersByIndustry(String industryCode) {
+        log.debug("Finding customers by industry: {}", industryCode);
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.isPep(true))
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasIndustryCode(industryCode))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toDTO) // Full DTO for compliance review
+                .map(customerMapper::toBasicDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Find customers in sanctions list
+     * Find customers by business classification
      */
-    public List<CustomerDTO> findSanctionsListCustomers() {
-        log.debug("Finding sanctions list customers");
-        
+    public List<CustomerDTO> findCustomersByBusinessClass(String businessClassCode) {
+        log.debug("Finding customers by business classification: {}", businessClassCode);
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.isSanctionsList(true))
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasBusinessClassCode(businessClassCode))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toDTO) // Full DTO for compliance review
+                .map(customerMapper::toBasicDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Find customers by KYC status
+     * Find customers by economic sector
      */
-    public List<CustomerDTO> findCustomersByKycStatus(String kycStatus) {
-        log.debug("Finding customers by KYC status: {}", kycStatus);
-        
+    public List<CustomerDTO> findCustomersBySector(String sectorCode) {
+        log.debug("Finding customers by sector: {}", sectorCode);
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasKycStatus(kycStatus))
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasSectorCode(sectorCode))
+                .and(CustomerSpecifications.isActive());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by language preference
+     */
+    public List<CustomerDTO> findCustomersByLanguage(String languageCode) {
+        log.debug("Finding customers by language: {}", languageCode);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasLanguageCode(languageCode))
+                .and(CustomerSpecifications.isActive());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by contact channel
+     */
+    public List<CustomerDTO> findCustomersByContactChannel(String contactChannelCode) {
+        log.debug("Finding customers by contact channel: {}", contactChannelCode);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasContactChannelCode(contactChannelCode))
+                .and(CustomerSpecifications.isActive());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by monthly income
+     */
+    public List<CustomerDTO> findCustomersByMonthlyIncome(String monthlyIncome) {
+        log.debug("Finding customers by monthly income: {}", monthlyIncome);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasMonthlyIncome(monthlyIncome))
+                .and(CustomerSpecifications.isActive());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by registration channel
+     */
+    public List<CustomerDTO> findCustomersByRegistrationChannel(String registrationChannel) {
+        log.debug("Finding customers by registration channel: {}", registrationChannel);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasRegistrationChannel(registrationChannel))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toDTO) // Full DTO for KYC review
+                .map(customerMapper::toBasicDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Find customers by risk level
+     * Find internal clients
      */
-    public List<CustomerDTO> findCustomersByRiskLevel(String riskLevel) {
-        log.debug("Finding customers by risk level: {}", riskLevel);
-        
+    public List<CustomerDTO> findInternalClients() {
+        log.debug("Finding internal clients");
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasRiskLevel(riskLevel))
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.isInternalClient("Y"))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toDTO) // Full DTO for risk review
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find taxable customers
+     */
+    public List<CustomerDTO> findTaxableCustomers() {
+        log.debug("Finding taxable customers");
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.isTaxable("Y"))
+                .and(CustomerSpecifications.isActive());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
                 .collect(Collectors.toList());
     }
 
@@ -312,15 +409,15 @@ public class CustomerDomainService {
      */
     public List<CustomerDTO> findCustomersCreatedInRange(LocalDate startDate, LocalDate endDate) {
         log.debug("Finding customers created between: {} and {}", startDate, endDate);
-        
+
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay();
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
                 .and(CustomerSpecifications.createdBetween(startDateTime, endDateTime))
                 .and(CustomerSpecifications.excludeClosed());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
                 .map(customerMapper::toSummaryDTO)
@@ -328,158 +425,33 @@ public class CustomerDomainService {
     }
 
     /**
-     * Find high-risk customers
+     * Find customers by CIF created date range
      */
-    public List<CustomerDTO> findHighRiskCustomers() {
-        log.debug("Finding high-risk customers");
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.isHighRisk())
-                .and(CustomerSpecifications.isActive());
-        
-        return customerRepository.findAll(spec)
-                .stream()
-                .map(customerMapper::toDTO) // Full DTO for risk management
-                .collect(Collectors.toList());
-    }
+    public List<CustomerDTO> findCustomersByCifCreatedDateRange(LocalDate startDate, LocalDate endDate) {
+        log.debug("Finding customers by CIF created date: {} to {}", startDate, endDate);
 
-    /**
-     * Find customers with expired identifications
-     */
-    public List<CustomerDTO> findCustomersWithExpiredId() {
-        log.debug("Finding customers with expired identifications");
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasExpiredIdentification())
-                .and(CustomerSpecifications.isActive());
-        
-        return customerRepository.findAll(spec)
-                .stream()
-                .map(customerMapper::toDTO) // Full DTO for compliance action
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Find customers with identification expiring soon
-     */
-    public List<CustomerDTO> findCustomersWithIdExpiringSoon(int daysAhead) {
-        log.debug("Finding customers with ID expiring in {} days", daysAhead);
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.hasIdentificationExpiringSoon(daysAhead))
-                .and(CustomerSpecifications.isActive());
-        
-        return customerRepository.findAll(spec)
-                .stream()
-                .map(customerMapper::toDTO) // Full DTO for proactive customer contact
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Find customers requiring KYC renewal
-     */
-    public List<CustomerDTO> findCustomersRequiringKycRenewal(LocalDateTime cutoffDate) {
-        log.debug("Finding customers requiring KYC renewal since: {}", cutoffDate);
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.requiresKycRenewal(cutoffDate))
-                .and(CustomerSpecifications.isActive());
-        
-        return customerRepository.findAll(spec)
-                .stream()
-                .map(customerMapper::toDTO) // Full DTO for KYC renewal process
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Find customers for periodic review
-     */
-    public List<CustomerDTO> findCustomersForPeriodicReview(LocalDateTime reviewDate) {
-        log.debug("Finding customers for periodic review since: {}", reviewDate);
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withAllRelatedData())
-                .and(CustomerSpecifications.isActive())
-                .and(Specification.anyOf(
-                    CustomerSpecifications.isHighRisk(),
-                    CustomerSpecifications.isPep(true)
-                ))
-                .and(Specification.anyOf(
-                    Specification.where((root, query, cb) -> cb.isNull(root.get("lastModifiedDate"))),
-                    CustomerSpecifications.modifiedAfter(reviewDate)
-                ));
-        
-        return customerRepository.findAll(spec)
-                .stream()
-                .map(customerMapper::toDTO) // Full DTO for review process
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Complex search with multiple criteria
-     */
-    public Page<CustomerDTO> findCustomersWithCriteria(
-            String status,
-            String segment,
-            String riskLevel,
-            String branchId,
-            Pageable pageable) {
-        
-        log.debug("Finding customers with criteria - Status: {}, Segment: {}, Risk: {}, Branch: {}", 
-                 status, segment, riskLevel, branchId);
-        
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withSummaryData())
+                .and(CustomerSpecifications.hasCifCreatedDateBetween(startDate, endDate))
                 .and(CustomerSpecifications.excludeClosed());
-        
-        // Add optional criteria
-        if (status != null) {
-            spec = spec.and(CustomerSpecifications.hasCifStatus(status));
-        }
-        if (segment != null) {
-            spec = spec.and(CustomerSpecifications.hasCustomerSegment(segment));
-        }
-        if (riskLevel != null) {
-            spec = spec.and(CustomerSpecifications.hasRiskLevel(riskLevel));
-        }
-        if (branchId != null) {
-            spec = spec.and(CustomerSpecifications.hasBranchId(branchId));
-        }
-        
-        return customerRepository.findAll(spec, pageable)
-                .map(customerMapper::toSummaryDTO);
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toSummaryDTO)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Advanced search with text search
+     * Find customers by province
      */
-    public Page<CustomerDTO> complexSearch(String searchTerm, Pageable pageable) {
-        log.debug("Performing complex search with term: {}", searchTerm);
-        
-        Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.withSummaryData())
-                .and(CustomerSpecifications.complexSearch(searchTerm))
-                .and(CustomerSpecifications.excludeClosed());
-        
-        return customerRepository.findAll(spec, pageable)
-                .map(customerMapper::toSummaryDTO);
-    }
+    public List<CustomerDTO> findCustomersByProvince(String provinceCode) {
+        log.debug("Finding customers by province: {}", provinceCode);
 
-    /**
-     * Find customers by province (address-based search)
-     */
-    public List<CustomerDTO> findCustomersByProvince(String provinceId) {
-        log.debug("Finding customers by province: {}", provinceId);
-        
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withBasicRelatedData())
-                .and(CustomerSpecifications.hasAddressInProvince(provinceId))
+                .and(CustomerSpecifications.hasAddressInProvince(provinceCode))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
                 .map(customerMapper::toBasicDTO)
@@ -487,16 +459,16 @@ public class CustomerDomainService {
     }
 
     /**
-     * Find customers by district (address-based search)
+     * Find customers by district
      */
-    public List<CustomerDTO> findCustomersByDistrict(String districtId) {
-        log.debug("Finding customers by district: {}", districtId);
-        
+    public List<CustomerDTO> findCustomersByDistrict(String districtCode) {
+        log.debug("Finding customers by district: {}", districtCode);
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withBasicRelatedData())
-                .and(CustomerSpecifications.hasAddressInDistrict(districtId))
+                .and(CustomerSpecifications.hasAddressInDistrict(districtCode))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
                 .map(customerMapper::toBasicDTO)
@@ -508,16 +480,118 @@ public class CustomerDomainService {
      */
     public List<CustomerDTO> findCustomersByProductType(String productType) {
         log.debug("Finding customers by product type: {}", productType);
-        
+
         Specification<Customer> spec = Specification
                 .where(CustomerSpecifications.withAllRelatedData())
                 .and(CustomerSpecifications.hasProductType(productType))
                 .and(CustomerSpecifications.isActive());
-        
+
         return customerRepository.findAll(spec)
                 .stream()
-                .map(customerMapper::toDTO) // Full DTO to show products
+                .map(customerMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by source application
+     */
+    public List<CustomerDTO> findCustomersBySourceApp(String sourceApp) {
+        log.debug("Finding customers by source app: {}", sourceApp);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasSourceApp(sourceApp))
+                .and(CustomerSpecifications.excludeClosed());
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers by correlation ID
+     */
+    public List<CustomerDTO> findCustomersByCorrelationId(String correlationId) {
+        log.debug("Finding customers by correlation ID: {}", correlationId);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withBasicRelatedData())
+                .and(CustomerSpecifications.hasCorrelationId(correlationId));
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toBasicDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find customers for periodic review
+     */
+    public List<CustomerDTO> findCustomersForPeriodicReview(LocalDateTime reviewDate) {
+        log.debug("Finding customers for periodic review since: {}", reviewDate);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withAllRelatedData())
+                .and(CustomerSpecifications.isActive())
+                .and(Specification.anyOf(
+                        Specification.where((root, query, cb) -> cb.isNull(root.get("updatedAt"))),
+                        CustomerSpecifications.modifiedAfter(reviewDate)
+                ));
+
+        return customerRepository.findAll(spec)
+                .stream()
+                .map(customerMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Complex search with multiple criteria
+     */
+    public Page<CustomerDTO> findCustomersWithCriteria(
+            String status,
+            String segment,
+            String clientType,
+            String category,
+            Pageable pageable) {
+
+        log.debug("Finding customers with criteria - Status: {}, Segment: {}, ClientType: {}, Category: {}",
+                status, segment, clientType, category);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withSummaryData())
+                .and(CustomerSpecifications.excludeClosed());
+
+        if (status != null) {
+            spec = spec.and(CustomerSpecifications.hasCifStatus(status));
+        }
+        if (segment != null) {
+            spec = spec.and(CustomerSpecifications.hasSegmentCode(segment));
+        }
+        if (clientType != null) {
+            spec = spec.and(CustomerSpecifications.hasClientTypeCode(clientType));
+        }
+        if (category != null) {
+            spec = spec.and(CustomerSpecifications.hasCategoryCode(category));
+        }
+
+        return customerRepository.findAll(spec, pageable)
+                .map(customerMapper::toSummaryDTO);
+    }
+
+    /**
+     * Complex text search
+     */
+    public Page<CustomerDTO> complexSearch(String searchTerm, Pageable pageable) {
+        log.debug("Performing complex search with term: {}", searchTerm);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.withSummaryData())
+                .and(CustomerSpecifications.complexSearch(searchTerm))
+                .and(CustomerSpecifications.excludeClosed());
+
+        return customerRepository.findAll(spec, pageable)
+                .map(customerMapper::toSummaryDTO);
     }
 
     // Count and existence methods
@@ -527,33 +601,46 @@ public class CustomerDomainService {
      */
     public Long countCustomersByStatus(String status) {
         log.debug("Counting customers by status: {}", status);
-        
+
         Specification<Customer> spec = CustomerSpecifications.hasCifStatus(status);
-        
+
         return customerRepository.count(spec);
     }
 
     /**
-     * Count customers by risk level
+     * Count customers by client type
      */
-    public Long countCustomersByRiskLevel(String riskLevel) {
-        log.debug("Counting customers by risk level: {}", riskLevel);
-        
+    public Long countCustomersByClientType(String clientTypeCode) {
+        log.debug("Counting customers by client type: {}", clientTypeCode);
+
         Specification<Customer> spec = Specification
-                .where(CustomerSpecifications.hasRiskLevel(riskLevel))
+                .where(CustomerSpecifications.hasClientTypeCode(clientTypeCode))
                 .and(CustomerSpecifications.isActive());
-        
+
+        return customerRepository.count(spec);
+    }
+
+    /**
+     * Count customers by segment
+     */
+    public Long countCustomersBySegment(String segmentCode) {
+        log.debug("Counting customers by segment: {}", segmentCode);
+
+        Specification<Customer> spec = Specification
+                .where(CustomerSpecifications.hasSegmentCode(segmentCode))
+                .and(CustomerSpecifications.isActive());
+
         return customerRepository.count(spec);
     }
 
     /**
      * Check if customer exists by ID
      */
-    public Boolean customerExists(String customerId) {
+    public Boolean customerExists(UUID customerId) {
         log.debug("Checking if customer exists: {}", customerId);
-        
+
         Specification<Customer> spec = CustomerSpecifications.hasCustomerId(customerId);
-        
+
         return customerRepository.count(spec) > 0;
     }
 
@@ -562,14 +649,13 @@ public class CustomerDomainService {
      */
     public Boolean customerExistsByEmail(String email) {
         log.debug("Checking if customer exists by email");
-        
+
         if (email == null || email.trim().isEmpty()) {
             return false;
         }
-        
-//        String emailHash = dataProtectionService.hashSensitiveData(email.trim().toLowerCase());
-        Specification<Customer> spec = CustomerSpecifications.hasEmailHash(email.toLowerCase());
-        
+
+        Specification<Customer> spec = CustomerSpecifications.hasEmail(email.toLowerCase());
+
         return customerRepository.count(spec) > 0;
     }
 
@@ -578,15 +664,29 @@ public class CustomerDomainService {
      */
     public Boolean customerExistsByPhoneNumber(String phoneNumber) {
         log.debug("Checking if customer exists by phone number");
-        
+
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
             return false;
         }
-        
+
         String normalizedPhone = normalizePhoneNumber(phoneNumber);
-//        String phoneHash = dataProtectionService.hashSensitiveData(normalizedPhone);
-        Specification<Customer> spec = CustomerSpecifications.hasPhoneHash(normalizedPhone);
-        
+        Specification<Customer> spec = CustomerSpecifications.hasPrimaryPhone(normalizedPhone);
+
+        return customerRepository.count(spec) > 0;
+    }
+
+    /**
+     * Check if customer exists by tax file number
+     */
+    public Boolean customerExistsByTaxFileNo(String taxFileNo) {
+        log.debug("Checking if customer exists by tax file number");
+
+        if (taxFileNo == null || taxFileNo.trim().isEmpty()) {
+            return false;
+        }
+
+        Specification<Customer> spec = CustomerSpecifications.hasTaxFileNo(taxFileNo);
+
         return customerRepository.count(spec) > 0;
     }
 
@@ -595,24 +695,19 @@ public class CustomerDomainService {
      */
     public CustomerStatistics getCustomerStatistics() {
         log.debug("Getting customer statistics");
-        
+
         long totalActive = countCustomersByStatus("ACTIVE");
         long totalInactive = countCustomersByStatus("INACTIVE");
         long totalSuspended = countCustomersByStatus("SUSPENDED");
         long totalClosed = countCustomersByStatus("CLOSED");
-        
-        long highRisk = customerRepository.count(
-            Specification.where(CustomerSpecifications.isHighRisk())
+
+        long internalClients = customerRepository.count(
+                Specification.where(CustomerSpecifications.isInternalClient("Y"))
                         .and(CustomerSpecifications.isActive())
         );
-        
-        long pepCustomers = customerRepository.count(
-            Specification.where(CustomerSpecifications.isPep(true))
-                        .and(CustomerSpecifications.isActive())
-        );
-        
-        long sanctionsCustomers = customerRepository.count(
-            Specification.where(CustomerSpecifications.isSanctionsList(true))
+
+        long taxableCustomers = customerRepository.count(
+                Specification.where(CustomerSpecifications.isTaxable("Y"))
                         .and(CustomerSpecifications.isActive())
         );
 
@@ -621,14 +716,13 @@ public class CustomerDomainService {
                 .totalInactive(totalInactive)
                 .totalSuspended(totalSuspended)
                 .totalClosed(totalClosed)
-                .highRisk(highRisk)
-                .pepCustomers(pepCustomers)
-                .sanctionsCustomers(sanctionsCustomers)
+                .internalClients(internalClients)
+                .taxableCustomers(taxableCustomers)
                 .build();
     }
 
-    // Private helper methods
-    
+    // Helper methods
+
     private String normalizePhoneNumber(String phone) {
         if (phone == null) return null;
         String normalized = phone.replaceAll("[^0-9+]", "");
@@ -638,7 +732,7 @@ public class CustomerDomainService {
         return normalized;
     }
 
-    // Inner class for statistics
+    // Statistics inner class
     @lombok.Data
     @lombok.Builder
     public static class CustomerStatistics {
@@ -646,8 +740,7 @@ public class CustomerDomainService {
         private Long totalInactive;
         private Long totalSuspended;
         private Long totalClosed;
-        private Long highRisk;
-        private Long pepCustomers;
-        private Long sanctionsCustomers;
+        private Long internalClients;
+        private Long taxableCustomers;
     }
 }

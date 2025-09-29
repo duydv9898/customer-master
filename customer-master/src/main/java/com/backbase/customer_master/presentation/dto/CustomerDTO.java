@@ -11,10 +11,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
-/**
- * Customer Data Transfer Object
- */
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,127 +21,156 @@ import java.util.List;
 @Schema(description = "Customer information")
 public class CustomerDTO {
 
-    @Schema(description = "Customer ID (CIF)", example = "CIF1234567890")
-    private String customerId;
+    @Schema(description = "Customer ID (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID customerId;
 
-    @Schema(description = "Customer type", example = "INDIVIDUAL", allowableValues = {"INDIVIDUAL", "CORPORATE", "SME"})
-    private String customerType;
+    @Schema(description = "CIF status", example = "ACTIVE")
+    private String cifStatus;
 
-    @Schema(description = "Full name of the customer", example = "Nguyen Van A")
+    @Schema(description = "Full name", example = "Nguyen Van A")
     private String fullName;
 
-    @Schema(description = "First name", example = "Van A")
-    private String firstName;
+    @Schema(description = "Gender code")
+    private String genderCode;
 
-    @Schema(description = "Middle name", example = "Van")
-    private String middleName;
+    @Schema(description = "Gender name")
+    private String genderName;
 
-    @Schema(description = "Last name", example = "Nguyen")
-    private String lastName;
-
-    @Schema(description = "Date of birth", example = "1990-01-15")
+    @Schema(description = "Date of birth")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth;
 
-    @Schema(description = "Place of birth", example = "Hanoi, Vietnam")
-    private String placeOfBirth;
+    @Schema(description = "Nationality code")
+    private String nationalityCode;
 
-    @Schema(description = "Gender ID")
-    private String genderId;
+    @Schema(description = "Nationality name")
+    private String nationalityName;
 
-    @Schema(description = "Marital status ID")
-    private String maritalStatusId;
+    @Schema(description = "Marital status code")
+    private String maritalStatusCode;
 
-    @Schema(description = "Nationality ID")
-    private String nationalityId;
+    @Schema(description = "Marital status name")
+    private String maritalStatusName;
 
-    @Schema(description = "Email address", example = "nguyenvana@example.com")
-    private String email;
+    @Schema(description = "Client type code")
+    private String clientTypeCode;
 
-    @Schema(description = "Primary phone number", example = "+84901234567")
-    private String phoneNumber;
+    @Schema(description = "Client type name")
+    private String clientTypeName;
 
-    @Schema(description = "Secondary phone number", example = "+84987654321")
+    @Schema(description = "Category code")
+    private String categoryCode;
+
+    @Schema(description = "Category name")
+    private String categoryName;
+
+    @Schema(description = "Primary phone", example = "+84901234567")
+    private String primaryPhone;
+
+    @Schema(description = "Secondary phone")
     private String secondaryPhone;
 
-    @Schema(description = "Occupation", example = "Software Engineer")
-    private String occupation;
+    @Schema(description = "Email", example = "customer@example.com")
+    private String email;
 
-    @Schema(description = "Education level", example = "Bachelor's Degree")
-    private String educationLevel;
+    @Schema(description = "Preferred contact channel code")
+    private String contactChannelCode;
 
-    @Schema(description = "Income range", example = "20M-50M VND")
-    private String incomeRange;
+    @Schema(description = "Preferred contact channel name")
+    private String contactChannelName;
 
-    @Schema(description = "CIF status", example = "ACTIVE", allowableValues = {"ACTIVE", "INACTIVE", "SUSPENDED", "CLOSED"})
-    private String cifStatus;
+    @Schema(description = "Occupation code")
+    private String occupationCode;
 
-    @Schema(description = "Risk level", example = "LOW", allowableValues = {"LOW", "MEDIUM", "HIGH"})
-    private String riskLevel;
+    @Schema(description = "Occupation name")
+    private String occupationName;
 
-    @Schema(description = "Is Politically Exposed Person", example = "false")
-    private Boolean isPep;
+    @Schema(description = "Job title")
+    private String jobTitle;
 
-    @Schema(description = "Is in sanctions list", example = "false")
-    private Boolean isSanctionsList;
+    @Schema(description = "Industry code")
+    private String industryCode;
 
-    @Schema(description = "KYC status", example = "COMPLETED", allowableValues = {"PENDING", "IN_PROGRESS", "COMPLETED", "REJECTED"})
-    private String kycStatus;
+    @Schema(description = "Industry name")
+    private String industryName;
 
-    @Schema(description = "Branch ID where customer was onboarded")
-    private String branchId;
+    @Schema(description = "Business classification code")
+    private String businessClassCode;
 
-    @Schema(description = "Customer segment", example = "PREMIUM")
-    private String customerSegment;
+    @Schema(description = "Business classification name")
+    private String businessClassName;
 
-    @Schema(description = "Relationship manager ID")
-    private String relationshipManagerId;
+    @Schema(description = "Economic sector code")
+    private String sectorCode;
 
-    @Schema(description = "Tax identification number")
-    private String taxId;
+    @Schema(description = "Economic sector name")
+    private String sectorName;
 
-    @Schema(description = "Source of funds", example = "Salary")
-    private String sourceOfFund;
+    @Schema(description = "Monthly income")
+    private String monthlyIncome;
 
-    @Schema(description = "Referral source", example = "Online")
-    private String referralSource;
+    @Schema(description = "Main income source")
+    private String mainIncomeSource;
 
-    @Schema(description = "Language preference", example = "vi", allowableValues = {"vi", "en"})
-    private String languagePreference;
+    @Schema(description = "Account usage purpose")
+    private String accountUsagePurpose;
 
-    @Schema(description = "Communication preference", example = "EMAIL")
-    private String communicationPreference;
+    @Schema(description = "Internal client flag", example = "Y")
+    private String internalClient;
 
-    @Schema(description = "Marketing consent", example = "true")
-    private Boolean isConsentMarketing;
+    @Schema(description = "Tax file number")
+    private String taxFileNo;
 
-    @Schema(description = "Consent date")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime consentDate;
+    @Schema(description = "Taxable flag", example = "Y")
+    private String taxable;
 
-    @Schema(description = "Last contact date")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastContactDate;
+    @Schema(description = "Registration channel")
+    private String registrationChannel;
 
-    @Schema(description = "Additional notes")
+    @Schema(description = "CIF created date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate cifCreatedDate;
+
+    @Schema(description = "Preferred language code")
+    private String preferredLanguageCode;
+
+    @Schema(description = "Preferred language name")
+    private String preferredLanguageName;
+
+    @Schema(description = "Customer segment code")
+    private String segmentCode;
+
+    @Schema(description = "Customer segment name")
+    private String segmentName;
+
+    @Schema(description = "Notes")
     private String notes;
 
+    @Schema(description = "Customer classification")
+    private String customerClassification;
+
     @Schema(description = "Version number for optimistic locking")
-    private Long versionNo;
+    private Integer versionNo;
 
-    @Schema(description = "Created date")
+    @Schema(description = "Created at")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdDate;
+    private LocalDateTime createdAt;
 
-    @Schema(description = "Last modified date")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastModifiedDate;
-
-    @Schema(description = "Created by user")
+    @Schema(description = "Created by")
     private String createdBy;
 
-    @Schema(description = "Last modified by user")
-    private String lastModifiedBy;
+    @Schema(description = "Updated at")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
+
+    @Schema(description = "Updated by")
+    private String updatedBy;
+
+    @Schema(description = "Source application")
+    private String sourceApp;
+
+    @Schema(description = "Correlation ID")
+    private String correlationId;
 
     // Related entities
     @Schema(description = "Customer addresses")

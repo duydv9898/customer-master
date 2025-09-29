@@ -7,103 +7,109 @@ import lombok.NoArgsConstructor;
 
 import jakarta.validation.constraints.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-/**
- * Command to create a new customer
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateCustomerCommand {
-    
-    @NotBlank(message = "Customer type is required")
-    @Size(max = 50, message = "Customer type must not exceed 50 characters")
-    private String customerType;
+
+    @NotBlank(message = "CIF status is required")
+    @Size(max = 20, message = "CIF status must not exceed 20 characters")
+    private String cifStatus;
 
     @NotBlank(message = "Full name is required")
-    @Size(max = 200, message = "Full name must not exceed 200 characters")
+    @Size(max = 120, message = "Full name must not exceed 120 characters")
     private String fullName;
 
-    @NotBlank(message = "First name is required")
-    @Size(max = 100, message = "First name must not exceed 100 characters")
-    private String firstName;
-
-    @Size(max = 100, message = "Middle name must not exceed 100 characters")
-    private String middleName;
-
-    @NotBlank(message = "Last name is required")
-    @Size(max = 100, message = "Last name must not exceed 100 characters")
-    private String lastName;
+    @NotBlank(message = "Gender code is required")
+    private String genderCode;
 
     @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be in the past")
     private LocalDate dateOfBirth;
 
-    @Size(max = 200, message = "Place of birth must not exceed 200 characters")
-    private String placeOfBirth;
+    @NotBlank(message = "Nationality code is required")
+    private String nationalityCode;
 
-    private String genderId;
-    private String maritalStatusId;
-    private String nationalityId;
+    private String maritalStatusCode;
 
-    @Email(message = "Invalid email format")
-    @Size(max = 100, message = "Email must not exceed 100 characters")
-    private String email;
+    @NotBlank(message = "Client type code is required")
+    private String clientTypeCode;
 
+    private String categoryCode;
+
+    @NotBlank(message = "Primary phone is required")
+    @Size(max = 20, message = "Primary phone must not exceed 20 characters")
     @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid phone number format")
-    @Size(max = 20, message = "Phone number must not exceed 20 characters")
-    private String phoneNumber;
+    private String primaryPhone;
 
-    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid secondary phone number format")
     @Size(max = 20, message = "Secondary phone must not exceed 20 characters")
+    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid phone number format")
     private String secondaryPhone;
 
-    @Size(max = 100, message = "Occupation must not exceed 100 characters")
-    private String occupation;
+    @Email(message = "Invalid email format")
+    @Size(max = 254, message = "Email must not exceed 254 characters")
+    private String email;
 
-    @Size(max = 50, message = "Education level must not exceed 50 characters")
-    private String educationLevel;
+    private String contactChannelCode;
 
-    @Size(max = 50, message = "Income range must not exceed 50 characters")
-    private String incomeRange;
+    private String occupationCode;
 
-    @Size(max = 20, message = "Risk level must not exceed 20 characters")
-    private String riskLevel;
+    @Size(max = 100, message = "Job title must not exceed 100 characters")
+    private String jobTitle;
 
-    private Boolean isPep;
-    private Boolean isSanctionsList;
+    private String industryCode;
 
-    @Size(max = 20, message = "KYC status must not exceed 20 characters")
-    private String kycStatus;
+    private String businessClassCode;
 
-    @NotBlank(message = "Branch ID is required")
-    private String branchId;
+    private String sectorCode;
 
-    @Size(max = 50, message = "Customer segment must not exceed 50 characters")
-    private String customerSegment;
+    @Size(max = 20, message = "Monthly income must not exceed 20 characters")
+    private String monthlyIncome;
 
-    private String relationshipManagerId;
+    @Size(max = 30, message = "Main income source must not exceed 30 characters")
+    private String mainIncomeSource;
 
-    @Size(max = 50, message = "Tax ID must not exceed 50 characters")
-    private String taxId;
+    @NotBlank(message = "Account usage purpose is required")
+    @Size(max = 50, message = "Account usage purpose must not exceed 50 characters")
+    private String accountUsagePurpose;
 
-    @Size(max = 100, message = "Source of fund must not exceed 100 characters")
-    private String sourceOfFund;
+    @Size(max = 1, message = "Internal client must be 1 character")
+    @Pattern(regexp = "^[YN]$", message = "Internal client must be Y or N")
+    private String internalClient;
 
-    @Size(max = 100, message = "Referral source must not exceed 100 characters")
-    private String referralSource;
+    @Size(max = 20, message = "Tax file number must not exceed 20 characters")
+    private String taxFileNo;
 
-    @Size(max = 10, message = "Language preference must not exceed 10 characters")
-    private String languagePreference;
+    @Size(max = 1, message = "Taxable must be 1 character")
+    @Pattern(regexp = "^[YN]$", message = "Taxable must be Y or N")
+    private String taxable;
 
-    @Size(max = 50, message = "Communication preference must not exceed 50 characters")
-    private String communicationPreference;
+    @NotBlank(message = "Registration channel is required")
+    @Size(max = 20, message = "Registration channel must not exceed 20 characters")
+    private String registrationChannel;
 
-    private Boolean isConsentMarketing;
-    private LocalDateTime consentDate;
+    @NotNull(message = "CIF created date is required")
+    private LocalDate cifCreatedDate;
+
+    private String preferredLanguageCode;
+
+    private String segmentCode;
+
+    @Size(max = 500, message = "Notes must not exceed 500 characters")
     private String notes;
-    private String createdBy;
-}
 
+    @Size(max = 30, message = "Customer classification must not exceed 30 characters")
+    private String customerClassification;
+
+    @NotBlank(message = "Created by is required")
+    @Size(max = 50, message = "Created by must not exceed 50 characters")
+    private String createdBy;
+
+    @Size(max = 50, message = "Source app must not exceed 50 characters")
+    private String sourceApp;
+
+    @Size(max = 50, message = "Correlation ID must not exceed 50 characters")
+    private String correlationId;
+}

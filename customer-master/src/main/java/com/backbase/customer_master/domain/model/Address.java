@@ -1,3 +1,5 @@
+package com.backbase.customer_master.domain.model;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -64,4 +66,23 @@ public class Address {
 
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
+
+    @PrePersist
+    protected void onCreate() {
+        if (addressId == null) {
+            addressId = UUID.randomUUID();
+        }
+        if (versionNo == null) {
+            versionNo = 0;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        versionNo++;
+    }
 }

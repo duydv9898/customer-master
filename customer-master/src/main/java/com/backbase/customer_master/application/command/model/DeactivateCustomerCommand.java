@@ -4,7 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor; /**
+import lombok.NoArgsConstructor;
+
+import java.util.UUID;
+
+/**
  * Command to deactivate customer (soft delete)
  */
 @Data
@@ -14,7 +18,7 @@ import lombok.NoArgsConstructor; /**
 public class DeactivateCustomerCommand {
 
     @NotBlank(message = "Customer ID is required")
-    private String customerId;
+    private UUID customerId;
 
     private String lastModifiedBy;
 }

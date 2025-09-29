@@ -2,8 +2,8 @@ package com.backbase.customer_master.application.command.handler;
 
 import com.backbase.customer_master.application.command.model.*;
 import com.backbase.customer_master.common.exception.*;
-import com.backbase.customer_master.domain.model.Customer;
-import com.backbase.customer_master.domain.repository.CustomerRepository;
+import com.backbase.customer_master.domain.model.*;
+import com.backbase.customer_master.domain.repository.*;
 import com.backbase.customer_master.presentation.dto.CustomerDTO;
 import com.backbase.customer_master.infrastructure.persistence.mapper.CustomerMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-/**
- * Command Handler for Customer operations (CQRS Pattern)
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -26,222 +24,326 @@ public class CustomerCommandHandler {
     private final CustomerRepository customerRepository;
     private final CustomerMapper customerMapper;
 
-    /**
-     * Handle CreateCustomerCommand
-     */
+    // Reference data repositories
+    private final GenderRepository genderRepository;
+    private final CountryRepository countryRepository;
+    private final MaritalStatusRepository maritalStatusRepository;
+    private final ClientTypeRepository clientTypeRepository;
+    private final CategoryRepository categoryRepository;
+    private final OccupationRepository occupationRepository;
+    private final IndustryRepository industryRepository;
+    private final BusinessClassificationRepository businessClassificationRepository;
+    private final EconomicSectorRepository economicSectorRepository;
+    private final LanguageRepository languageRepository;
+    private final ContactChannelRepository contactChannelRepository;
+    private final CustomerSegmentRepository customerSegmentRepository;
+
     public CustomerDTO handle(CreateCustomerCommand command) {
-        log.debug("Handling CreateCustomerCommand for email: {}", command.getEmail());
-        
-        // Validate if customer already exists
-        if (command.getEmail() != null && 
-            customerRepository.existsByEmailOrPhoneNumber(command.getEmail(), command.getPhoneNumber())) {
+        log.debug("Handling CreateCustomerCommand for: {}", command.getFullName());
+
+        // Validate uniqueness
+        if (command.getEmail() != null &&
+                customerRepository.existsByEmailOrPrimaryPhone(command.getEmail(), command.getPrimaryPhone())) {
             throw new CustomerAlreadyExistsException("Customer already exists with email or phone number");
         }
-        
-        // Create customer entity
+
+        // Build customer entity
         Customer customer = Customer.builder()
-                .customerType(command.getCustomerType())
+                .customerId(UUID.randomUUID())
+                .cifStatus(command.getCifStatus())
                 .fullName(command.getFullName())
-                .firstName(command.getFirstName())
-                .middleName(command.getMiddleName())
-                .lastName(command.getLastName())
                 .dateOfBirth(command.getDateOfBirth())
-                .placeOfBirth(command.getPlaceOfBirth())
-                .genderId(command.getGenderId())
-                .maritalStatusId(command.getMaritalStatusId())
-                .nationalityId(command.getNationalityId())
-                .email(command.getEmail())
-                .phoneNumber(command.getPhoneNumber())
+                .primaryPhone(command.getPrimaryPhone())
                 .secondaryPhone(command.getSecondaryPhone())
-                .occupation(command.getOccupation())
-                .educationLevel(command.getEducationLevel())
-                .incomeRange(command.getIncomeRange())
-                .riskLevel(command.getRiskLevel())
-                .isPep(command.getIsPep() != null ? command.getIsPep() : false)
-                .isSanctionsList(command.getIsSanctionsList() != null ? command.getIsSanctionsList() : false)
-                .kycStatus(command.getKycStatus())
-                .branchId(command.getBranchId())
-                .customerSegment(command.getCustomerSegment())
-                .relationshipManagerId(command.getRelationshipManagerId())
-                .taxId(command.getTaxId())
-                .sourceOfFund(command.getSourceOfFund())
-                .referralSource(command.getReferralSource())
-                .languagePreference(command.getLanguagePreference())
-                .communicationPreference(command.getCommunicationPreference())
-                .isConsentMarketing(command.getIsConsentMarketing() != null ? command.getIsConsentMarketing() : false)
-                .consentDate(command.getConsentDate())
+                .email(command.getEmail())
+                .jobTitle(command.getJobTitle())
+                .monthlyIncome(command.getMonthlyIncome())
+                .mainIncomeSource(command.getMainIncomeSource())
+                .accountUsagePurpose(command.getAccountUsagePurpose())
+                .internalClient(command.getInternalClient())
+                .taxFileNo(command.getTaxFileNo())
+                .taxable(command.getTaxable())
+                .registrationChannel(command.getRegistrationChannel())
+                .cifCreatedDate(command.getCifCreatedDate())
                 .notes(command.getNotes())
+                .customerClassification(command.getCustomerClassification())
+                .versionNo(0)
+                .createdAt(LocalDateTime.now())
                 .createdBy(command.getCreatedBy())
+                .updatedAt(LocalDateTime.now())
+                .updatedBy(command.getCreatedBy())
+                .sourceApp(command.getSourceApp())
+                .correlationId(command.getCorrelationId())
                 .build();
+
+        // Set reference data
+        setReferenceData(customer, command);
 
         // Save customer
         Customer savedCustomer = customerRepository.save(customer);
-        
+
         log.info("Customer created with ID: {}", savedCustomer.getCustomerId());
         return customerMapper.toDTO(savedCustomer);
     }
 
-    /**
-     * Handle UpdateCustomerCommand
-     */
     public CustomerDTO handle(UpdateCustomerCommand command) {
         log.debug("Handling UpdateCustomerCommand for customer: {}", command.getCustomerId());
-        
+
         Customer customer = customerRepository.findById(command.getCustomerId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + command.getCustomerId()));
-        
+
         try {
-            // Update customer fields
+            // Update basic fields
             if (command.getFullName() != null) {
                 customer.setFullName(command.getFullName());
-            }
-            if (command.getFirstName() != null) {
-                customer.setFirstName(command.getFirstName());
-            }
-            if (command.getMiddleName() != null) {
-                customer.setMiddleName(command.getMiddleName());
-            }
-            if (command.getLastName() != null) {
-                customer.setLastName(command.getLastName());
             }
             if (command.getDateOfBirth() != null) {
                 customer.setDateOfBirth(command.getDateOfBirth());
             }
-            if (command.getPlaceOfBirth() != null) {
-                customer.setPlaceOfBirth(command.getPlaceOfBirth());
-            }
-            if (command.getMaritalStatusId() != null) {
-                customer.setMaritalStatusId(command.getMaritalStatusId());
+            if (command.getSecondaryPhone() != null) {
+                customer.setSecondaryPhone(command.getSecondaryPhone());
             }
             if (command.getEmail() != null) {
                 customer.setEmail(command.getEmail());
             }
-            if (command.getPhoneNumber() != null) {
-                customer.setPhoneNumber(command.getPhoneNumber());
+            if (command.getJobTitle() != null) {
+                customer.setJobTitle(command.getJobTitle());
             }
-            if (command.getSecondaryPhone() != null) {
-                customer.setSecondaryPhone(command.getSecondaryPhone());
+            if (command.getMonthlyIncome() != null) {
+                customer.setMonthlyIncome(command.getMonthlyIncome());
             }
-            if (command.getOccupation() != null) {
-                customer.setOccupation(command.getOccupation());
+            if (command.getMainIncomeSource() != null) {
+                customer.setMainIncomeSource(command.getMainIncomeSource());
             }
-            if (command.getEducationLevel() != null) {
-                customer.setEducationLevel(command.getEducationLevel());
+            if (command.getAccountUsagePurpose() != null) {
+                customer.setAccountUsagePurpose(command.getAccountUsagePurpose());
             }
-            if (command.getIncomeRange() != null) {
-                customer.setIncomeRange(command.getIncomeRange());
+            if (command.getTaxFileNo() != null) {
+                customer.setTaxFileNo(command.getTaxFileNo());
             }
-            if (command.getRiskLevel() != null) {
-                customer.setRiskLevel(command.getRiskLevel());
-            }
-            if (command.getIsPep() != null) {
-                customer.setIsPep(command.getIsPep());
-            }
-            if (command.getIsSanctionsList() != null) {
-                customer.setIsSanctionsList(command.getIsSanctionsList());
-            }
-            if (command.getKycStatus() != null) {
-                customer.setKycStatus(command.getKycStatus());
-            }
-            if (command.getCustomerSegment() != null) {
-                customer.setCustomerSegment(command.getCustomerSegment());
-            }
-            if (command.getRelationshipManagerId() != null) {
-                customer.setRelationshipManagerId(command.getRelationshipManagerId());
-            }
-            if (command.getTaxId() != null) {
-                customer.setTaxId(command.getTaxId());
-            }
-            if (command.getSourceOfFund() != null) {
-                customer.setSourceOfFund(command.getSourceOfFund());
-            }
-            if (command.getReferralSource() != null) {
-                customer.setReferralSource(command.getReferralSource());
-            }
-            if (command.getLanguagePreference() != null) {
-                customer.setLanguagePreference(command.getLanguagePreference());
-            }
-            if (command.getCommunicationPreference() != null) {
-                customer.setCommunicationPreference(command.getCommunicationPreference());
-            }
-            if (command.getIsConsentMarketing() != null) {
-                customer.setIsConsentMarketing(command.getIsConsentMarketing());
-            }
-            if (command.getConsentDate() != null) {
-                customer.setConsentDate(command.getConsentDate());
+            if (command.getTaxable() != null) {
+                customer.setTaxable(command.getTaxable());
             }
             if (command.getNotes() != null) {
                 customer.setNotes(command.getNotes());
             }
-            if (command.getLastModifiedBy() != null) {
-                customer.setLastModifiedBy(command.getLastModifiedBy());
+            if (command.getCustomerClassification() != null) {
+                customer.setCustomerClassification(command.getCustomerClassification());
             }
-            
+
+            // Update reference data
+            updateReferenceData(customer, command);
+
+            // Update metadata
+            customer.setUpdatedAt(LocalDateTime.now());
+            if (command.getUpdatedBy() != null) {
+                customer.setUpdatedBy(command.getUpdatedBy());
+            }
+            if (command.getCorrelationId() != null) {
+                customer.setCorrelationId(command.getCorrelationId());
+            }
+
             // Check version for optimistic locking
             if (command.getVersionNo() != null && !command.getVersionNo().equals(customer.getVersionNo())) {
                 throw new OptimisticLockingException("Customer has been modified by another user");
             }
 
             Customer savedCustomer = customerRepository.save(customer);
-            
+
             log.info("Customer updated: {}", savedCustomer.getCustomerId());
             return customerMapper.toDTO(savedCustomer);
-            
+
         } catch (OptimisticLockingFailureException ex) {
             throw new OptimisticLockingException("Customer has been modified by another user", ex);
         }
     }
 
-    /**
-     * Handle UpdateCustomerStatusCommand
-     */
     public CustomerDTO handle(UpdateCustomerStatusCommand command) {
         log.debug("Handling UpdateCustomerStatusCommand for customer: {}", command.getCustomerId());
-        
+
         Customer customer = customerRepository.findById(command.getCustomerId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + command.getCustomerId()));
-        
+
         customer.updateStatus(command.getStatus());
         if (command.getLastModifiedBy() != null) {
-            customer.setLastModifiedBy(command.getLastModifiedBy());
+            customer.setUpdatedBy(command.getLastModifiedBy());
         }
-        
+
         Customer savedCustomer = customerRepository.save(customer);
-        
+
         log.info("Customer status updated to: {} for customer: {}", command.getStatus(), command.getCustomerId());
         return customerMapper.toDTO(savedCustomer);
     }
 
-    /**
-     * Handle DeactivateCustomerCommand
-     */
     public void handle(DeactivateCustomerCommand command) {
         log.debug("Handling DeactivateCustomerCommand for customer: {}", command.getCustomerId());
-        
+
         Customer customer = customerRepository.findById(command.getCustomerId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + command.getCustomerId()));
-        
+
         customer.updateStatus("INACTIVE");
         if (command.getLastModifiedBy() != null) {
-            customer.setLastModifiedBy(command.getLastModifiedBy());
+            customer.setUpdatedBy(command.getLastModifiedBy());
         }
-        
+
         customerRepository.save(customer);
-        
+
         log.info("Customer deactivated: {}", command.getCustomerId());
     }
 
-    /**
-     * Handle DeleteCustomerCommand
-     */
     public void handle(DeleteCustomerCommand command) {
         log.warn("Handling DeleteCustomerCommand for customer: {}", command.getCustomerId());
-        
+
         Customer customer = customerRepository.findById(command.getCustomerId())
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + command.getCustomerId()));
-        
+
         customerRepository.delete(customer);
-        
+
         log.warn("Customer hard deleted: {}", command.getCustomerId());
+    }
+
+    // Helper methods
+    private void setReferenceData(Customer customer, CreateCustomerCommand command) {
+        // Set gender
+        if (command.getGenderCode() != null) {
+            Gender gender = genderRepository.findByGenderCode(command.getGenderCode())
+                    .orElseThrow(() -> new ValidationException("Invalid gender code: " + command.getGenderCode()));
+            customer.setGender(gender);
+        }
+
+        // Set nationality
+        if (command.getNationalityCode() != null) {
+            Country nationality = countryRepository.findByCountryCode(command.getNationalityCode())
+                    .orElseThrow(() -> new ValidationException("Invalid nationality code: " + command.getNationalityCode()));
+            customer.setNationality(nationality);
+        }
+
+        // Set marital status
+        if (command.getMaritalStatusCode() != null) {
+            MaritalStatus maritalStatus = maritalStatusRepository.findByMaritalStatusCode(command.getMaritalStatusCode())
+                    .orElseThrow(() -> new ValidationException("Invalid marital status code: " + command.getMaritalStatusCode()));
+            customer.setMaritalStatus(maritalStatus);
+        }
+
+        // Set client type
+        if (command.getClientTypeCode() != null) {
+            ClientType clientType = clientTypeRepository.findByClientTypeCode(command.getClientTypeCode())
+                    .orElseThrow(() -> new ValidationException("Invalid client type code: " + command.getClientTypeCode()));
+            customer.setClientType(clientType);
+        }
+
+        // Set category
+        if (command.getCategoryCode() != null) {
+            Category category = categoryRepository.findByCategoryCode(command.getCategoryCode())
+                    .orElseThrow(() -> new ValidationException("Invalid category code: " + command.getCategoryCode()));
+            customer.setCategory(category);
+        }
+
+        // Set occupation
+        if (command.getOccupationCode() != null) {
+            Occupation occupation = occupationRepository.findByOccupationCode(command.getOccupationCode())
+                    .orElseThrow(() -> new ValidationException("Invalid occupation code: " + command.getOccupationCode()));
+            customer.setOccupation(occupation);
+        }
+
+        // Set industry
+        if (command.getIndustryCode() != null) {
+            Industry industry = industryRepository.findByIndustryCode(command.getIndustryCode())
+                    .orElseThrow(() -> new ValidationException("Invalid industry code: " + command.getIndustryCode()));
+            customer.setClassificationIndustry(industry);
+        }
+
+        // Set business classification
+        if (command.getBusinessClassCode() != null) {
+            BusinessClassification businessClass = businessClassificationRepository.findByBusinessClassCode(command.getBusinessClassCode())
+                    .orElseThrow(() -> new ValidationException("Invalid business class code: " + command.getBusinessClassCode()));
+            customer.setClassificationBusiness(businessClass);
+        }
+
+        // Set economic sector
+        if (command.getSectorCode() != null) {
+            EconomicSector sector = economicSectorRepository.findBySectorCode(command.getSectorCode())
+                    .orElseThrow(() -> new ValidationException("Invalid sector code: " + command.getSectorCode()));
+            customer.setClassificationSector(sector);
+        }
+
+        // Set preferred language
+        if (command.getPreferredLanguageCode() != null) {
+            Language language = languageRepository.findByLanguageCode(command.getPreferredLanguageCode())
+                    .orElseThrow(() -> new ValidationException("Invalid language code: " + command.getPreferredLanguageCode()));
+            customer.setPreferredLanguage(language);
+        }
+
+        // Set contact channel
+        if (command.getContactChannelCode() != null) {
+            ContactChannel channel = contactChannelRepository.findByContactChannelCode(command.getContactChannelCode())
+                    .orElseThrow(() -> new ValidationException("Invalid contact channel code: " + command.getContactChannelCode()));
+            customer.setPreferredContactChannel(channel);
+        }
+
+        // Set customer segment
+        if (command.getSegmentCode() != null) {
+            CustomerSegment segment = customerSegmentRepository.findBySegmentCode(command.getSegmentCode())
+                    .orElseThrow(() -> new ValidationException("Invalid segment code: " + command.getSegmentCode()));
+            customer.setCustomerSegment(segment);
+        }
+    }
+
+    private void updateReferenceData(Customer customer, UpdateCustomerCommand command) {
+        // Update marital status
+        if (command.getMaritalStatusCode() != null) {
+            MaritalStatus maritalStatus = maritalStatusRepository.findByMaritalStatusCode(command.getMaritalStatusCode())
+                    .orElseThrow(() -> new ValidationException("Invalid marital status code"));
+            customer.setMaritalStatus(maritalStatus);
+        }
+
+        // Update occupation
+        if (command.getOccupationCode() != null) {
+            Occupation occupation = occupationRepository.findByOccupationCode(command.getOccupationCode())
+                    .orElseThrow(() -> new ValidationException("Invalid occupation code"));
+            customer.setOccupation(occupation);
+        }
+
+        // Update industry
+        if (command.getIndustryCode() != null) {
+            Industry industry = industryRepository.findByIndustryCode(command.getIndustryCode())
+                    .orElseThrow(() -> new ValidationException("Invalid industry code"));
+            customer.setClassificationIndustry(industry);
+        }
+
+        // Update business classification
+        if (command.getBusinessClassCode() != null) {
+            BusinessClassification businessClass = businessClassificationRepository.findByBusinessClassCode(command.getBusinessClassCode())
+                    .orElseThrow(() -> new ValidationException("Invalid business class code"));
+            customer.setClassificationBusiness(businessClass);
+        }
+
+        // Update economic sector
+        if (command.getSectorCode() != null) {
+            EconomicSector sector = economicSectorRepository.findBySectorCode(command.getSectorCode())
+                    .orElseThrow(() -> new ValidationException("Invalid sector code"));
+            customer.setClassificationSector(sector);
+        }
+
+        // Update preferred language
+        if (command.getPreferredLanguageCode() != null) {
+            Language language = languageRepository.findByLanguageCode(command.getPreferredLanguageCode())
+                    .orElseThrow(() -> new ValidationException("Invalid language code"));
+            customer.setPreferredLanguage(language);
+        }
+
+        // Update contact channel
+        if (command.getContactChannelCode() != null) {
+            ContactChannel channel = contactChannelRepository.findByContactChannelCode(command.getContactChannelCode())
+                    .orElseThrow(() -> new ValidationException("Invalid contact channel code"));
+            customer.setPreferredContactChannel(channel);
+        }
+
+        // Update customer segment
+        if (command.getSegmentCode() != null) {
+            CustomerSegment segment = customerSegmentRepository.findBySegmentCode(command.getSegmentCode())
+                    .orElseThrow(() -> new ValidationException("Invalid segment code"));
+            customer.setCustomerSegment(segment);
+        }
     }
 }

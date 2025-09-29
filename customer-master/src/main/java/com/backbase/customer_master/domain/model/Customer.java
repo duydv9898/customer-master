@@ -1,5 +1,5 @@
-
 package com.backbase.customer_master.domain.model;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @Builder
 public class Customer {
     @Id
-    @Column(name = "customer_id", length = 20)
+    @Column(name = "customer_id", nullable = false)
     private UUID customerId;
 
     @Column(name = "cif_status", length = 20, nullable = false)
@@ -138,6 +138,7 @@ public class Customer {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
+    // Relationships
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses;
 
@@ -149,4 +150,29 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<CustomerProduct> products;
+
+    // Business methods
+    @PrePersist
+    protected void onCreate() {
+        if (customerId == null) {
+            customerId = UUID.randomUUID();
+        }
+        if (versionNo == null) {
+            versionNo = 0;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        versionNo++;
+    }
+
+    public void updateStatus(String newStatus) {
+        this.cifStatus = newStatus;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

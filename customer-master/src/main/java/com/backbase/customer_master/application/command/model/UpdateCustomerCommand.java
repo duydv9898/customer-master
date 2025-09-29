@@ -7,91 +7,77 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime; /**
- * Command to update an existing customer
- */
+import java.util.UUID;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateCustomerCommand {
 
-    @NotBlank(message = "Customer ID is required")
-    private String customerId;
+    @NotNull(message = "Customer ID is required")
+    private UUID customerId;
 
-    @Size(max = 200, message = "Full name must not exceed 200 characters")
+    @Size(max = 120, message = "Full name must not exceed 120 characters")
     private String fullName;
-
-    @Size(max = 100, message = "First name must not exceed 100 characters")
-    private String firstName;
-
-    @Size(max = 100, message = "Middle name must not exceed 100 characters")
-    private String middleName;
-
-    @Size(max = 100, message = "Last name must not exceed 100 characters")
-    private String lastName;
 
     @Past(message = "Date of birth must be in the past")
     private LocalDate dateOfBirth;
 
-    @Size(max = 200, message = "Place of birth must not exceed 200 characters")
-    private String placeOfBirth;
+    private String maritalStatusCode;
 
-    private String maritalStatusId;
-
-    @Email(message = "Invalid email format")
-    @Size(max = 100, message = "Email must not exceed 100 characters")
-    private String email;
-
-    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid phone number format")
-    @Size(max = 20, message = "Phone number must not exceed 20 characters")
-    private String phoneNumber;
-
-    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid secondary phone number format")
     @Size(max = 20, message = "Secondary phone must not exceed 20 characters")
+    @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "Invalid phone number format")
     private String secondaryPhone;
 
-    @Size(max = 100, message = "Occupation must not exceed 100 characters")
-    private String occupation;
+    @Email(message = "Invalid email format")
+    @Size(max = 254, message = "Email must not exceed 254 characters")
+    private String email;
 
-    @Size(max = 50, message = "Education level must not exceed 50 characters")
-    private String educationLevel;
+    private String contactChannelCode;
 
-    @Size(max = 50, message = "Income range must not exceed 50 characters")
-    private String incomeRange;
+    private String occupationCode;
 
-    @Size(max = 20, message = "Risk level must not exceed 20 characters")
-    private String riskLevel;
+    @Size(max = 100, message = "Job title must not exceed 100 characters")
+    private String jobTitle;
 
-    private Boolean isPep;
-    private Boolean isSanctionsList;
+    private String industryCode;
 
-    @Size(max = 20, message = "KYC status must not exceed 20 characters")
-    private String kycStatus;
+    private String businessClassCode;
 
-    @Size(max = 50, message = "Customer segment must not exceed 50 characters")
-    private String customerSegment;
+    private String sectorCode;
 
-    private String relationshipManagerId;
+    @Size(max = 20, message = "Monthly income must not exceed 20 characters")
+    private String monthlyIncome;
 
-    @Size(max = 50, message = "Tax ID must not exceed 50 characters")
-    private String taxId;
+    @Size(max = 30, message = "Main income source must not exceed 30 characters")
+    private String mainIncomeSource;
 
-    @Size(max = 100, message = "Source of fund must not exceed 100 characters")
-    private String sourceOfFund;
+    @Size(max = 50, message = "Account usage purpose must not exceed 50 characters")
+    private String accountUsagePurpose;
 
-    @Size(max = 100, message = "Referral source must not exceed 100 characters")
-    private String referralSource;
+    @Size(max = 20, message = "Tax file number must not exceed 20 characters")
+    private String taxFileNo;
 
-    @Size(max = 10, message = "Language preference must not exceed 10 characters")
-    private String languagePreference;
+    @Size(max = 1, message = "Taxable must be 1 character")
+    @Pattern(regexp = "^[YN]$", message = "Taxable must be Y or N")
+    private String taxable;
 
-    @Size(max = 50, message = "Communication preference must not exceed 50 characters")
-    private String communicationPreference;
+    private String preferredLanguageCode;
 
-    private Boolean isConsentMarketing;
-    private LocalDateTime consentDate;
+    private String segmentCode;
+
+    @Size(max = 500, message = "Notes must not exceed 500 characters")
     private String notes;
-    private Long versionNo;
-    private String lastModifiedBy;
+
+    @Size(max = 30, message = "Customer classification must not exceed 30 characters")
+    private String customerClassification;
+
+    private Integer versionNo;
+
+    @Size(max = 50, message = "Updated by must not exceed 50 characters")
+    private String updatedBy;
+
+    @Size(max = 50, message = "Correlation ID must not exceed 50 characters")
+    private String correlationId;
 }

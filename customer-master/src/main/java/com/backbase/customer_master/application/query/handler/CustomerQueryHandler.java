@@ -2,7 +2,6 @@ package com.backbase.customer_master.application.query.handler;
 
 import com.backbase.customer_master.application.query.model.*;
 import com.backbase.customer_master.common.exception.CustomerNotFoundException;
-import com.backbase.customer_master.domain.model.Customer;
 import com.backbase.customer_master.domain.service.CustomerDomainService;
 import com.backbase.customer_master.presentation.dto.CustomerDTO;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.management.Query;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
- * Query Handler sử dụng CustomerDomainService với JPA Specifications
+ * Query Handler sử dụng CustomerDomainService
  * Trả về CustomerDTO với đầy đủ thông tin từ fetch joins
  */
 @Component
@@ -33,7 +32,9 @@ public class CustomerQueryHandler {
     public CustomerDTO handle(GetCustomerByIdQuery query) {
         log.debug("Handling GetCustomerByIdQuery for customer ID: {}", query.getCustomerId());
 
-        return customerDomainService.findCustomerById(query.getCustomerId())
+        UUID customerId = parseCustomerId(query.getCustomerId());
+
+        return customerDomainService.findCustomerById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + query.getCustomerId()));
     }
 
@@ -43,7 +44,9 @@ public class CustomerQueryHandler {
     public CustomerDTO handle(GetCustomerBasicByIdQuery query) {
         log.debug("Handling GetCustomerBasicByIdQuery for customer ID: {}", query.getCustomerId());
 
-        return customerDomainService.findCustomerBasicById(query.getCustomerId())
+        UUID customerId = parseCustomerId(query.getCustomerId());
+
+        return customerDomainService.findCustomerBasicById(customerId)
                 .orElseThrow(() -> new CustomerNotFoundException("Customer not found with ID: " + query.getCustomerId()));
     }
 
@@ -71,7 +74,10 @@ public class CustomerQueryHandler {
     public Page<CustomerDTO> handle(GetCustomersByBranchQuery query) {
         log.debug("Handling GetCustomersByBranchQuery for branch: {}", query.getBranchId());
 
-        return customerDomainService.findCustomersByBranch(query.getBranchId(), query.getPageable());
+        // Note: Cần thêm method findCustomersByBranch trong CustomerDomainService
+        // Hiện tại sử dụng complex search
+        return customerDomainService.findCustomersWithCriteria(
+                null, null, null, null, query.getPageable());
     }
 
     /**
@@ -79,13 +85,6 @@ public class CustomerQueryHandler {
      */
     public Page<CustomerDTO> handle(GetCustomersByTypeQuery query) {
         log.debug("Handling GetCustomersByTypeQuery for type: {}", query.getCustomerType());
-
-//        Customer.CustomerType customerType;
-//        try {
-//            customerType = Customer.CustomerType.valueOf(query.getCustomerType().toUpperCase());
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid customer type: " + query.getCustomerType());
-//        }
 
         return customerDomainService.findCustomersByType(query.getCustomerType(), query.getPageable());
     }
@@ -97,7 +96,8 @@ public class CustomerQueryHandler {
         log.debug("Handling GetCustomersByStatusQuery for status: {}", query.getStatus());
 
         // Sử dụng pagination để tránh memory issues
-        Page<CustomerDTO> page = customerDomainService.findCustomersByStatus(query.getStatus(),
+        Page<CustomerDTO> page = customerDomainService.findCustomersByStatus(
+                query.getStatus(),
                 org.springframework.data.domain.PageRequest.of(0, 1000));
         return page.getContent();
     }
@@ -155,7 +155,9 @@ public class CustomerQueryHandler {
     public List<CustomerDTO> handle(GetCustomersByRelationshipManagerQuery query) {
         log.debug("Handling GetCustomersByRelationshipManagerQuery for RM: {}", query.getRelationshipManagerId());
 
-        return customerDomainService.findCustomersByRelationshipManager(query.getRelationshipManagerId());
+        // Note: Cần thêm method findCustomersByRelationshipManager trong CustomerDomainService
+        // Tạm thời return empty list hoặc throw exception
+        throw new UnsupportedOperationException("Method not implemented yet");
     }
 
     /**
@@ -164,14 +166,8 @@ public class CustomerQueryHandler {
     public List<CustomerDTO> handle(GetCustomersByKycStatusQuery query) {
         log.debug("Handling GetCustomersByKycStatusQuery for status: {}", query.getKycStatus());
 
-//        Customer.KycStatus kycStatus;
-//        try {
-//            kycStatus = Customer.KycStatus.valueOf(query.getKycStatus().toUpperCase().replace(" ", "_"));
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid KYC status: " + query.getKycStatus());
-//        }
-
-        return customerDomainService.findCustomersByKycStatus(query.getKycStatus());
+        // Note: Cần thêm method findCustomersByKycStatus trong CustomerDomainService
+        throw new UnsupportedOperationException("Method not implemented yet");
     }
 
     /**
@@ -180,14 +176,8 @@ public class CustomerQueryHandler {
     public List<CustomerDTO> handle(GetCustomersByRiskLevelQuery query) {
         log.debug("Handling GetCustomersByRiskLevelQuery for risk level: {}", query.getRiskLevel());
 
-//        Customer.RiskLevel riskLevel;
-//        try {
-//            riskLevel = Customer.RiskLevel.valueOf(query.getRiskLevel().toUpperCase());
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid risk level: " + query.getRiskLevel());
-//        }
-
-        return customerDomainService.findCustomersByRiskLevel(query.getRiskLevel());
+        // Note: Cần thêm method findCustomersByRiskLevel trong CustomerDomainService
+        throw new UnsupportedOperationException("Method not implemented yet");
     }
 
     /**
@@ -195,13 +185,6 @@ public class CustomerQueryHandler {
      */
     public Page<CustomerDTO> handle(GetCustomersBySegmentQuery query) {
         log.debug("Handling GetCustomersBySegmentQuery for segment: {}", query.getCustomerSegment());
-
-//        Customer.CustomerSegment segment;
-//        try {
-//            segment = Customer.CustomerSegment.valueOf(query.getCustomerSegment().toUpperCase().replace(" ", "_"));
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid customer segment: " + query.getCustomerSegment());
-//        }
 
         return customerDomainService.findCustomersBySegment(query.getCustomerSegment(), query.getPageable());
     }
@@ -212,13 +195,6 @@ public class CustomerQueryHandler {
     public Long handle(CountCustomersByStatusQuery query) {
         log.debug("Handling CountCustomersByStatusQuery for status: {}", query.getStatus());
 
-//        Customer.CifStatus status;
-//        try {
-//            status = Customer.CifStatus.valueOf(query.getStatus().toUpperCase());
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid CIF status: " + query.getStatus());
-//        }
-
         return customerDomainService.countCustomersByStatus(query.getStatus());
     }
 
@@ -228,85 +204,198 @@ public class CustomerQueryHandler {
     public Boolean handle(CustomerExistsQuery query) {
         log.debug("Handling CustomerExistsQuery for customer: {}", query.getCustomerId());
 
-        return customerDomainService.customerExists(query.getCustomerId());
+        UUID customerId = parseCustomerId(query.getCustomerId());
+        return customerDomainService.customerExists(customerId);
     }
 
-    // Additional handlers cho các queries đặc biệt
+    // Additional handlers for specific queries
 
     /**
-     * Handle GetPepCustomersQuery - lấy danh sách PEP customers
+     * Handle GetCustomersByOccupationQuery
      */
-    public List<CustomerDTO> handleGetPepCustomers() {
-        log.debug("Handling GetPepCustomersQuery");
+    public List<CustomerDTO> handleGetCustomersByOccupation(String occupationCode) {
+        log.debug("Handling GetCustomersByOccupationQuery for occupation: {}", occupationCode);
 
-        return customerDomainService.findPepCustomers();
-    }
-
-    /**
-     * Handle GetSanctionsListCustomersQuery - lấy danh sách sanctions customers
-     */
-    public List<CustomerDTO> handleGetSanctionsListCustomers() {
-        log.debug("Handling GetSanctionsListCustomersQuery");
-
-        return customerDomainService.findSanctionsListCustomers();
+        return customerDomainService.findCustomersByOccupation(occupationCode);
     }
 
     /**
-     * Handle GetHighRiskCustomersQuery - lấy danh sách high-risk customers
+     * Handle GetCustomersByIndustryQuery
      */
-    public List<CustomerDTO> handleGetHighRiskCustomers() {
-        log.debug("Handling GetHighRiskCustomersQuery");
+    public List<CustomerDTO> handleGetCustomersByIndustry(String industryCode) {
+        log.debug("Handling GetCustomersByIndustryQuery for industry: {}", industryCode);
 
-        return customerDomainService.findHighRiskCustomers();
+        return customerDomainService.findCustomersByIndustry(industryCode);
     }
 
     /**
-     * Handle GetCustomersWithExpiredIdQuery - lấy customer có giấy tờ hết hạn
+     * Handle GetCustomersByBusinessClassQuery
      */
-    public List<CustomerDTO> handleGetCustomersWithExpiredId() {
-        log.debug("Handling GetCustomersWithExpiredIdQuery");
+    public List<CustomerDTO> handleGetCustomersByBusinessClass(String businessClassCode) {
+        log.debug("Handling GetCustomersByBusinessClassQuery for business class: {}", businessClassCode);
 
-        return customerDomainService.findCustomersWithExpiredId();
+        return customerDomainService.findCustomersByBusinessClass(businessClassCode);
     }
 
     /**
-     * Handle GetCustomersWithIdExpiringSoonQuery - lấy customer có giấy tờ sắp hết hạn
+     * Handle GetCustomersBySectorQuery
      */
-    public List<CustomerDTO> handleGetCustomersWithIdExpiringSoon(int daysAhead) {
-        log.debug("Handling GetCustomersWithIdExpiringSoonQuery for {} days ahead", daysAhead);
+    public List<CustomerDTO> handleGetCustomersBySector(String sectorCode) {
+        log.debug("Handling GetCustomersBySectorQuery for sector: {}", sectorCode);
 
-        return customerDomainService.findCustomersWithIdExpiringSoon(daysAhead);
+        return customerDomainService.findCustomersBySector(sectorCode);
+    }
+
+    /**
+     * Handle GetCustomersByLanguageQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByLanguage(String languageCode) {
+        log.debug("Handling GetCustomersByLanguageQuery for language: {}", languageCode);
+
+        return customerDomainService.findCustomersByLanguage(languageCode);
+    }
+
+    /**
+     * Handle GetCustomersByContactChannelQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByContactChannel(String contactChannelCode) {
+        log.debug("Handling GetCustomersByContactChannelQuery for channel: {}", contactChannelCode);
+
+        return customerDomainService.findCustomersByContactChannel(contactChannelCode);
+    }
+
+    /**
+     * Handle GetCustomersByMonthlyIncomeQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByMonthlyIncome(String monthlyIncome) {
+        log.debug("Handling GetCustomersByMonthlyIncomeQuery for income: {}", monthlyIncome);
+
+        return customerDomainService.findCustomersByMonthlyIncome(monthlyIncome);
+    }
+
+    /**
+     * Handle GetCustomersByRegistrationChannelQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByRegistrationChannel(String registrationChannel) {
+        log.debug("Handling GetCustomersByRegistrationChannelQuery for channel: {}", registrationChannel);
+
+        return customerDomainService.findCustomersByRegistrationChannel(registrationChannel);
+    }
+
+    /**
+     * Handle GetInternalClientsQuery
+     */
+    public List<CustomerDTO> handleGetInternalClients() {
+        log.debug("Handling GetInternalClientsQuery");
+
+        return customerDomainService.findInternalClients();
+    }
+
+    /**
+     * Handle GetTaxableCustomersQuery
+     */
+    public List<CustomerDTO> handleGetTaxableCustomers() {
+        log.debug("Handling GetTaxableCustomersQuery");
+
+        return customerDomainService.findTaxableCustomers();
+    }
+
+    /**
+     * Handle GetCustomersByProvinceQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByProvince(String provinceCode) {
+        log.debug("Handling GetCustomersByProvinceQuery for province: {}", provinceCode);
+
+        return customerDomainService.findCustomersByProvince(provinceCode);
+    }
+
+    /**
+     * Handle GetCustomersByDistrictQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByDistrict(String districtCode) {
+        log.debug("Handling GetCustomersByDistrictQuery for district: {}", districtCode);
+
+        return customerDomainService.findCustomersByDistrict(districtCode);
+    }
+
+    /**
+     * Handle GetCustomersByProductTypeQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByProductType(String productType) {
+        log.debug("Handling GetCustomersByProductTypeQuery for product type: {}", productType);
+
+        return customerDomainService.findCustomersByProductType(productType);
+    }
+
+    /**
+     * Handle GetCustomersForPeriodicReviewQuery
+     */
+    public List<CustomerDTO> handleGetCustomersForPeriodicReview(java.time.LocalDateTime reviewDate) {
+        log.debug("Handling GetCustomersForPeriodicReviewQuery since: {}", reviewDate);
+
+        return customerDomainService.findCustomersForPeriodicReview(reviewDate);
+    }
+
+    /**
+     * Handle GetCustomersBySourceAppQuery
+     */
+    public List<CustomerDTO> handleGetCustomersBySourceApp(String sourceApp) {
+        log.debug("Handling GetCustomersBySourceAppQuery for source: {}", sourceApp);
+
+        return customerDomainService.findCustomersBySourceApp(sourceApp);
+    }
+
+    /**
+     * Handle GetCustomersByCorrelationIdQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByCorrelationId(String correlationId) {
+        log.debug("Handling GetCustomersByCorrelationIdQuery for correlationId: {}", correlationId);
+
+        return customerDomainService.findCustomersByCorrelationId(correlationId);
+    }
+
+    /**
+     * Handle GetCustomersByCategoryQuery
+     */
+    public Page<CustomerDTO> handleGetCustomersByCategory(String categoryCode, org.springframework.data.domain.Pageable pageable) {
+        log.debug("Handling GetCustomersByCategoryQuery for category: {}", categoryCode);
+
+        return customerDomainService.findCustomersByCategory(categoryCode, pageable);
+    }
+
+    /**
+     * Handle GetCustomersByCifCreatedDateRangeQuery
+     */
+    public List<CustomerDTO> handleGetCustomersByCifCreatedDateRange(
+            java.time.LocalDate startDate, java.time.LocalDate endDate) {
+        log.debug("Handling GetCustomersByCifCreatedDateRangeQuery from {} to {}", startDate, endDate);
+
+        return customerDomainService.findCustomersByCifCreatedDateRange(startDate, endDate);
+    }
+
+    /**
+     * Handle FindCustomerByTaxFileNoQuery
+     */
+    public Optional<CustomerDTO> handleFindCustomerByTaxFileNo(String taxFileNo) {
+        log.debug("Handling FindCustomerByTaxFileNoQuery");
+
+        return customerDomainService.findCustomerByTaxFileNo(taxFileNo);
     }
 
     /**
      * Handle Complex Search Query - tìm kiếm phức tạp với nhiều tiêu chí
      */
     public Page<CustomerDTO> handleComplexSearch(
-            String status, String segment, String riskLevel, String branchId,
+            String status,
+            String segment,
+            String clientType,
+            String category,
             org.springframework.data.domain.Pageable pageable) {
 
-        log.debug("Handling complex search - Status: {}, Segment: {}, Risk: {}, Branch: {}",
-                status, segment, riskLevel, branchId);
+        log.debug("Handling complex search - Status: {}, Segment: {}, ClientType: {}, Category: {}",
+                status, segment, clientType, category);
 
-//        Customer.CifStatus cifStatus = null;
-//        Customer.CustomerSegment customerSegment = null;
-//        Customer.RiskLevel customerRiskLevel = null;
-//
-//        try {
-//            if (status != null && !status.trim().isEmpty()) {
-//                cifStatus = Customer.CifStatus.valueOf(status.toUpperCase());
-//            }
-//            if (segment != null && !segment.trim().isEmpty()) {
-//                customerSegment = Customer.CustomerSegment.valueOf(segment.toUpperCase().replace(" ", "_"));
-//            }
-//            if (riskLevel != null && !riskLevel.trim().isEmpty()) {
-//                customerRiskLevel = Customer.RiskLevel.valueOf(riskLevel.toUpperCase());
-//            }
-//        } catch (IllegalArgumentException ex) {
-//            throw new IllegalArgumentException("Invalid search criteria: " + ex.getMessage());
-//        }
-
-        return customerDomainService.findCustomersWithCriteria(status, segment, segment, branchId, pageable);
+        return customerDomainService.findCustomersWithCriteria(status, segment, clientType, category, pageable);
     }
 
     /**
@@ -328,38 +417,60 @@ public class CustomerQueryHandler {
     }
 
     /**
-     * Handle Get Customers By Province Query - lấy customer theo tỉnh
+     * Handle Count Customers By Client Type Query
      */
-    public List<CustomerDTO> handleGetCustomersByProvince(String provinceId) {
-        log.debug("Handling GetCustomersByProvinceQuery for province: {}", provinceId);
+    public Long handleCountCustomersByClientType(String clientTypeCode) {
+        log.debug("Handling CountCustomersByClientTypeQuery for type: {}", clientTypeCode);
 
-        return customerDomainService.findCustomersByProvince(provinceId);
+        return customerDomainService.countCustomersByClientType(clientTypeCode);
     }
 
     /**
-     * Handle Get Customers By District Query - lấy customer theo quận/huyện
+     * Handle Count Customers By Segment Query
      */
-    public List<CustomerDTO> handleGetCustomersByDistrict(String districtId) {
-        log.debug("Handling GetCustomersByDistrictQuery for district: {}", districtId);
+    public Long handleCountCustomersBySegment(String segmentCode) {
+        log.debug("Handling CountCustomersBySegmentQuery for segment: {}", segmentCode);
 
-        return customerDomainService.findCustomersByDistrict(districtId);
+        return customerDomainService.countCustomersBySegment(segmentCode);
     }
 
     /**
-     * Handle Get Customers By Product Type Query - lấy customer theo loại sản phẩm
+     * Handle Customer Exists By Email Query
      */
-    public List<CustomerDTO> handleGetCustomersByProductType(String productType) {
-        log.debug("Handling GetCustomersByProductTypeQuery for product type: {}", productType);
+    public Boolean handleCustomerExistsByEmail(String email) {
+        log.debug("Handling CustomerExistsByEmailQuery");
 
-        return customerDomainService.findCustomersByProductType(productType);
+        return customerDomainService.customerExistsByEmail(email);
     }
 
     /**
-     * Handle Get Customers For Periodic Review Query - lấy customer cần review định kỳ
+     * Handle Customer Exists By Phone Number Query
      */
-    public List<CustomerDTO> handleGetCustomersForPeriodicReview(java.time.LocalDateTime reviewDate) {
-        log.debug("Handling GetCustomersForPeriodicReviewQuery since: {}", reviewDate);
+    public Boolean handleCustomerExistsByPhoneNumber(String phoneNumber) {
+        log.debug("Handling CustomerExistsByPhoneNumberQuery");
 
-        return customerDomainService.findCustomersForPeriodicReview(reviewDate);
+        return customerDomainService.customerExistsByPhoneNumber(phoneNumber);
+    }
+
+    /**
+     * Handle Customer Exists By Tax File No Query
+     */
+    public Boolean handleCustomerExistsByTaxFileNo(String taxFileNo) {
+        log.debug("Handling CustomerExistsByTaxFileNoQuery");
+
+        return customerDomainService.customerExistsByTaxFileNo(taxFileNo);
+    }
+
+    // Helper methods
+
+    /**
+     * Parse customer ID from String to UUID
+     */
+    private UUID parseCustomerId(String customerIdStr) {
+        try {
+            return UUID.fromString(customerIdStr);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid customer ID format: " + customerIdStr, e);
+        }
     }
 }
