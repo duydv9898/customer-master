@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 /**
  * REST Controller for Customer Command operations (CQRS Pattern)
  */
@@ -50,7 +52,7 @@ public class CustomerCommandController {
             @Valid @RequestBody UpdateCustomerCommand command) {
         log.info("Updating customer: {}", customerId);
         // Ensure command has the correct customer ID
-        command.setCustomerId(customerId);
+        command.setCustomerId(UUID.fromString(customerId));
 //        CustomerDTO updatedCustomer = customerCommandHandler.handle(command);
         return ResponseEntity.ok(customerCommandService.updateCustomer(command));
     }
@@ -65,7 +67,7 @@ public class CustomerCommandController {
         log.info("Updating customer status to: {} for customer: {}", status, customerId);
         
         UpdateCustomerStatusCommand command = UpdateCustomerStatusCommand.builder()
-                .customerId(customerId)
+                .customerId(UUID.fromString(customerId))
                 .status(status)
                 .build();
         
@@ -82,7 +84,7 @@ public class CustomerCommandController {
         log.info("Deactivating customer: {}", customerId);
         
         DeactivateCustomerCommand command = DeactivateCustomerCommand.builder()
-                .customerId(customerId)
+                .customerId(UUID.fromString(customerId))
                 .build();
         
 //        customerCommandHandler.handle(command);
@@ -99,7 +101,7 @@ public class CustomerCommandController {
         log.warn("Hard deleting customer: {}", customerId);
         
         DeleteCustomerCommand command = DeleteCustomerCommand.builder()
-                .customerId(customerId)
+                .customerId(UUID.fromString(customerId))
                 .build();
         
 //        customerCommandHandler.handle(command);

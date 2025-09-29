@@ -100,6 +100,9 @@ public class IdentificationDTO {
     @Schema(description = "Created by user")
     private String createdBy;
 
+    @Schema(description = "updated by user")
+    private String updatedBy;
+
     @Schema(description = "Last modified by user")
     private String lastModifiedBy;
 }

@@ -2,6 +2,7 @@ package com.backbase.customer_master.presentation.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -79,6 +80,9 @@ public class CustomerProductDTO {
 
     private String createdBy;
     private String lastModifiedBy;
+
+    @Schema(description = "updated by user")
+    private String updatedBy;
 
     // Product information for display
     private String productName;
