@@ -4,9 +4,9 @@ spring:
 
   # Database Configuration - MySQL local
   datasource:
-    url: jdbc:mysql://192.90.50.45:3306/customer_master_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: developer
-    password: bacaDev0ps@2024
+    url: jdbc:mysql://localhost:3306/customer_master_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: appuser
+    password: apppass
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10

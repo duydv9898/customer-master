@@ -1,0 +1,30 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: customer-master-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootPassword@2024
+      MYSQL_DATABASE: customer_master_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+      TZ: UTC
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/mysql/conf:/etc/mysql/conf.d:ro
+      - ./docker/mysql/logs:/var/log/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootPassword@2024"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql_data:
+    driver: local
