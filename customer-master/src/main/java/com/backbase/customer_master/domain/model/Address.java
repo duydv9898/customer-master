@@ -6,14 +6,23 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "address")
+@Table(name = "address",
+        indexes = {
+                @Index(name = "idx_address_customer", columnList = "customer_id"),
+                @Index(name = "idx_address_province", columnList = "province_code"),
+                @Index(name = "idx_address_district", columnList = "district_code")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"customer"})
+@EqualsAndHashCode(exclude = {"customer"})
 public class Address {
+
     @Id
-    @Column(name = "address_id", nullable = false)
+    @Column(name = "address_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID addressId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,6 +55,7 @@ public class Address {
     @JoinColumn(name = "postal_code", referencedColumnName = "postal_code")
     private PostalCode postalCode;
 
+    @Version
     @Column(name = "version_no", nullable = false)
     private Integer versionNo;
 
@@ -83,6 +93,5 @@ public class Address {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        versionNo++;
     }
 }

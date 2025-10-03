@@ -3,6 +3,7 @@ package com.backbase.customer_master.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,9 +21,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"addresses", "branches", "postalCodes"})
+@EqualsAndHashCode(exclude = {"addresses", "branches", "postalCodes"})
 public class Ward {
+
     @Id
-    @Column(name = "ward_id", nullable = false)
+    @Column(name = "ward_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID wardId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,7 +50,7 @@ public class Ward {
     @Column(name = "ward_name_local", length = 120)
     private String wardNameLocal;
 
-    // ✅ FIXED: Reference to postal_code_id (PRIMARY KEY) instead of postal_code (non-unique column)
+    // ✅ FIXED: Tham chiếu đến postal_code_id (PRIMARY KEY) thay vì postal_code
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "postal_code_id", referencedColumnName = "postal_code_id")
     private PostalCode postalCode;
@@ -73,11 +77,32 @@ public class Ward {
     private String correlationId;
 
     @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
-    private List<Address> addresses;
+    @Builder.Default
+    private List<Address> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
-    private List<Branch> branches;
+    @Builder.Default
+    private List<Branch> branches = new ArrayList<>();
 
     @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
-    private List<PostalCode> postalCodes;
+    @Builder.Default
+    private List<PostalCode> postalCodes = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (wardId == null) {
+            wardId = UUID.randomUUID();
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+        if (recordStatus == null) {
+            recordStatus = "ACTIVE";
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

@@ -6,14 +6,22 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer_product")
+@Table(name = "customer_product",
+        indexes = {
+                @Index(name = "idx_customer_product_customer", columnList = "customer_id"),
+                @Index(name = "idx_customer_product_group", columnList = "product_group")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"customer"})
+@EqualsAndHashCode(exclude = {"customer"})
 public class CustomerProduct {
+
     @Id
-    @Column(name = "customer_product_id", nullable = false)
+    @Column(name = "customer_product_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID customerProductId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +41,7 @@ public class CustomerProduct {
     @Column(name = "product_status", length = 20, nullable = false)
     private String productStatus;
 
+    @Version
     @Column(name = "version_no", nullable = false)
     private Integer versionNo;
 
@@ -53,4 +62,22 @@ public class CustomerProduct {
 
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
+
+    @PrePersist
+    protected void onCreate() {
+        if (customerProductId == null) {
+            customerProductId = UUID.randomUUID();
+        }
+        if (versionNo == null) {
+            versionNo = 0;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

@@ -4,18 +4,28 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "identification")
+@Table(name = "identification",
+        indexes = {
+                @Index(name = "idx_identification_customer", columnList = "customer_id"),
+                @Index(name = "idx_identification_number", columnList = "identification_number"),
+                @Index(name = "idx_identification_kyc", columnList = "kyc_status")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"customer", "identityDocuments"})
+@EqualsAndHashCode(exclude = {"customer", "identityDocuments"})
 public class Identification {
+
     @Id
-    @Column(name = "identification_id", nullable = false)
+    @Column(name = "identification_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID identificationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,6 +72,7 @@ public class Identification {
     @Column(name = "last_screening_date")
     private LocalDate lastScreeningDate;
 
+    @Version
     @Column(name = "version_no", nullable = false)
     private Integer versionNo;
 
@@ -83,6 +94,38 @@ public class Identification {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "identification", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<IdentityDocument> identityDocuments;
+    @OneToMany(mappedBy = "identification", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<IdentityDocument> identityDocuments = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (identificationId == null) {
+            identificationId = UUID.randomUUID();
+        }
+        if (versionNo == null) {
+            versionNo = 0;
+        }
+        if (idUpdateCount == null) {
+            idUpdateCount = 0;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public void addDocument(IdentityDocument document) {
+        identityDocuments.add(document);
+        document.setIdentification(this);
+    }
+
+    public void removeDocument(IdentityDocument document) {
+        identityDocuments.remove(document);
+        document.setIdentification(null);
+    }
 }

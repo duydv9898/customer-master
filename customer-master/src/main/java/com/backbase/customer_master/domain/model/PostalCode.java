@@ -7,16 +7,17 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "postal_code",
-        indexes = {
-                @Index(name = "idx_postal_code", columnList = "postal_code")
-        })
+        uniqueConstraints = @UniqueConstraint(name = "uk_postal_code", columnNames = "postal_code"),
+        indexes = @Index(name = "idx_postal_code", columnList = "postal_code")
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PostalCode {
+
     @Id
-    @Column(name = "postal_code_id", nullable = false)
+    @Column(name = "postal_code_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID postalCodeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,7 +36,7 @@ public class PostalCode {
     @JoinColumn(name = "ward_code", referencedColumnName = "ward_code")
     private Ward ward;
 
-    // THÊM UNIQUE CONSTRAINT VÀO ĐÂY
+    // FIXED: Thêm unique constraint
     @Column(name = "postal_code", length = 10, nullable = false, unique = true)
     private String postalCode;
 
@@ -62,4 +63,22 @@ public class PostalCode {
 
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
+
+    @PrePersist
+    protected void onCreate() {
+        if (postalCodeId == null) {
+            postalCodeId = UUID.randomUUID();
+        }
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+        if (recordStatus == null) {
+            recordStatus = "ACTIVE";
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
