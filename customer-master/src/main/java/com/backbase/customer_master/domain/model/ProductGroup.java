@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "product_group")
+@Table(name = "product_group",
+        uniqueConstraints = @UniqueConstraint(name = "uk_product_group_code", columnNames = "product_group_code"),
+        indexes = @Index(name = "idx_product_group_code", columnList = "product_group_code")
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,6 +53,6 @@ public class ProductGroup {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "productGroup", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "productGroup", fetch = FetchType.LAZY)
     private List<CustomerProduct> customerProducts;
 }

@@ -6,7 +6,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "postal_code")
+@Table(name = "postal_code",
+        indexes = {
+                @Index(name = "idx_postal_code", columnList = "postal_code")
+        })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,7 +35,8 @@ public class PostalCode {
     @JoinColumn(name = "ward_code", referencedColumnName = "ward_code")
     private Ward ward;
 
-    @Column(name = "postal_code", length = 10, nullable = false)
+    // THÊM UNIQUE CONSTRAINT VÀO ĐÂY
+    @Column(name = "postal_code", length = 10, nullable = false, unique = true)
     private String postalCode;
 
     @Column(name = "postal_name", length = 120)

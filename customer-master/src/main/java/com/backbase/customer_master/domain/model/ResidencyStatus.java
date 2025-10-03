@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "residency_status")
+@Table(name = "residency_status",
+        uniqueConstraints = @UniqueConstraint(name = "uk_residency_status_code", columnNames = "residency_status_code"),
+        indexes = @Index(name = "idx_residency_status_code", columnList = "residency_status_code")
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,6 +53,6 @@ public class ResidencyStatus {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "residencyStatus", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "residencyStatus", fetch = FetchType.LAZY)
     private List<Identification> identifications;
 }

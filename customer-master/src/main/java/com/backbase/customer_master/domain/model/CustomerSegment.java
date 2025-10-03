@@ -7,7 +7,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer_segment")
+@Table(name = "customer_segment",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_segment_code", columnNames = "segment_code")
+        },
+        indexes = {
+                @Index(name = "idx_segment_code", columnList = "segment_code")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +24,7 @@ public class CustomerSegment {
     @Column(name = "customer_segment_id", nullable = false)
     private UUID customerSegmentId;
 
-    @Column(name = "segment_code", length = 10, nullable = false)
+    @Column(name = "segment_code", length = 10, nullable = false, unique = true)
     private String segmentCode;
 
     @Column(name = "segment_name", length = 100, nullable = false)

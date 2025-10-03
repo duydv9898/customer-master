@@ -7,7 +7,15 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ward")
+@Table(name = "ward",
+        uniqueConstraints = @UniqueConstraint(name = "uk_ward_code", columnNames = "ward_code"),
+        indexes = {
+                @Index(name = "idx_ward_code", columnList = "ward_code"),
+                @Index(name = "idx_ward_district", columnList = "district_code"),
+                @Index(name = "idx_ward_province", columnList = "province_code"),
+                @Index(name = "idx_ward_country", columnList = "country_code")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,8 +46,9 @@ public class Ward {
     @Column(name = "ward_name_local", length = 120)
     private String wardNameLocal;
 
+    // ✅ FIXED: Reference to postal_code_id (PRIMARY KEY) instead of postal_code (non-unique column)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postal_code", referencedColumnName = "postal_code")
+    @JoinColumn(name = "postal_code_id", referencedColumnName = "postal_code_id")
     private PostalCode postalCode;
 
     @Column(name = "record_status", length = 20, nullable = false)
@@ -63,12 +72,12 @@ public class Ward {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
     private List<Address> addresses;
 
-    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
     private List<Branch> branches;
 
-    @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "ward", fetch = FetchType.LAZY)
     private List<PostalCode> postalCodes;
 }

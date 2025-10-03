@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "country")
+@Table(name = "country",
+        uniqueConstraints = @UniqueConstraint(name = "uk_country_code", columnNames = "country_code"),
+        indexes = @Index(name = "idx_country_code", columnList = "country_code")
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,18 +59,9 @@ public class Country {
     @Column(name = "correlation_id", length = 50)
     private String correlationId;
 
-    @OneToMany(mappedBy = "domicileCountry", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "domicileCountry", fetch = FetchType.LAZY)
     private List<Address> addresses;
 
-    @OneToMany(mappedBy = "nationality", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "nationality", fetch = FetchType.LAZY)
     private List<Customer> customers;
-
-    @OneToMany(mappedBy = "domicileCountry", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Branch> branches;
-
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Province> provinces;
-
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PostalCode> postalCodes;
 }
