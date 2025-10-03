@@ -53,9 +53,6 @@ public class Customer {
     @Column(name = "cif_created_date", nullable = false)
     private LocalDate cifCreatedDate;
 
-    // ============================================
-    // CONTACT INFORMATION
-    // ============================================
     @Column(name = "primary_phone", length = 20, nullable = false)
     private String primaryPhone;
 

@@ -6,11 +6,22 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customer_relationship")
+@Table(name = "customer_relationship",
+        indexes = {
+                @Index(name = "idx_customer_relationship_customer", columnList = "customer_id"),
+                @Index(name = "idx_customer_relationship_related", columnList = "related_customer_id"),
+                @Index(name = "idx_customer_relationship_type", columnList = "relationship_type"),
+                @Index(name = "idx_customer_relationship_branch", columnList = "managing_branch"),
+                @Index(name = "idx_customer_relationship_status", columnList = "status"),
+                @Index(name = "idx_customer_relationship_group", columnList = "group_id")
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(exclude = {"customer", "relatedCustomer", "managingBranch"})
+@EqualsAndHashCode(exclude = {"customer", "relatedCustomer", "managingBranch"})
 public class CustomerRelationship {
     @Id
     @Column(name = "relationship_id", nullable = false)
